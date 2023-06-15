@@ -1,4 +1,4 @@
 """
 Пакет для хранения файлов с конфигурационными данными
 """
-from . import config
+from .config import Config, load_config

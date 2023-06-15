@@ -1,4 +1,4 @@
 """
 Пакет для хранения текстов - ответов вашего бота.
 """
-from . import lexicon_en, lexicon_ru
+from .lexicon_ru import LEXICON_COMMANDS_RU
