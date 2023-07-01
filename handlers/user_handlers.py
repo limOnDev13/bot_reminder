@@ -10,13 +10,14 @@ import keyboards
 from lexicon import LEXICON_RU
 import services
 from models import models
+from models import DataBaseClass
 
 
 router: Router = Router()
 
 
 @router.message(CommandStart())
-async def process_start_command(message: Message):
+async def process_start_command(message: Message, database: DataBaseClass):
     await message.answer(text=LEXICON_RU['start'])
 
 
