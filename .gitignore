@@ -1,3 +1,6 @@
 .env
 .idea/vcs.xml
 models/__pycache__
+filters/__pycache__/
+keyboards/__pycache__/keyboard_utils.cpython-310.pyc
+states/__pycache__/

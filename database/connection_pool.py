@@ -14,14 +14,11 @@ class DataBaseClass:
                       fetchval: bool = False,
                       fetchrow: bool = False,
                       execute: bool = False):
-        async with self.pool.acquire() as connection:
-            connection: Connection
-            async with connection.transaction():
-                if fetch:
-                    return await connection.fetch(command, *args)
-                elif fetchval:
-                    return await connection.fetchval(command, *args)
-                elif fetchrow:
-                    return await connection.fetchrow(command, *args)
-                elif execute:
-                    return await connection.execute(command, *args)
+        if fetch:
+            return await self.pool.fetch(command, *args)
+        elif fetchval:
+            return await self.pool.fetchval(command, *args)
+        elif fetchrow:
+            return await self.pool.fetchrow(command, *args)
+        elif execute:
+            return await self.pool.execute(command, *args)
