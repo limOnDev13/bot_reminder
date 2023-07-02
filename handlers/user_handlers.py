@@ -9,8 +9,7 @@ from aiogram.types import Message, CallbackQuery
 import keyboards
 from lexicon import LEXICON_RU
 import services
-from models import models
-from models import DataBaseClass
+from database import DataBaseClass, add_new_user
 
 
 router: Router = Router()
@@ -19,6 +18,7 @@ router: Router = Router()
 @router.message(CommandStart())
 async def process_start_command(message: Message, database: DataBaseClass):
     await message.answer(text=LEXICON_RU['start'])
+    await add_new_user(connector=database, user_id=message.from_user.id)
 
 
 @router.message(Command(commands=['help']))

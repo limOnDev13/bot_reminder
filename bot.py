@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher
 from keyboards import set_main_menu
 from config_data import Config, load_config
 from handlers import other_handlers, user_handlers
-from utils import DataBaseMiddleware
+from middlewares import DataBaseMiddleware
 
 
 logger = logging.getLogger(__name__)
@@ -34,6 +34,7 @@ async def main():
                                              user=config.con_pool.user.user,
                                              password=config.con_pool.user.password
                                              )
+
     dp.message.register(DataBaseMiddleware(pool_connect))
 
     dp.include_router(user_handlers.router)

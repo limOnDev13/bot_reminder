@@ -1,5 +1,5 @@
 """
-Модуль с ORM-моделями б/д.
+Модуль, для создания и хранения пула подключения в классе
 """
 from asyncpg.pool import Pool
 from asyncpg import Connection
@@ -10,10 +10,10 @@ class DataBaseClass:
         self.pool = pool
 
     async def execute(self, command: str, *args,
-                      fetch: bool,
-                      fetchval: bool,
-                      fetchrow: bool,
-                      execute: bool):
+                      fetch: bool = False,
+                      fetchval: bool = False,
+                      fetchrow: bool = False,
+                      execute: bool = False):
         async with self.pool.acquire() as connection:
             connection: Connection
             async with connection.transaction():
@@ -25,5 +25,3 @@ class DataBaseClass:
                     return await connection.fetchrow(command, *args)
                 elif execute:
                     return await connection.execute(command, *args)
-
-

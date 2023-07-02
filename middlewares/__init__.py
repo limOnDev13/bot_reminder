@@ -4,3 +4,4 @@
 как они попадут в хэндлер.
 """
 from . import trottling
+from .db_middleware import DataBaseMiddleware
