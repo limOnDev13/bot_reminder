@@ -3,4 +3,4 @@
 отражающими возможные состояния пользователей
 в процессе взаимодействия с ботом, для реализации машины состояний
 """
-from .states import FSMReminderCreating
+from .states import FSMReminderCreating, FSMRemindersEditor

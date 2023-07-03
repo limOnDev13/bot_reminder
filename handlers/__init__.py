@@ -3,4 +3,5 @@
 """
 from . import admin_handlers,\
               private_user_handlers,\
-              user_handlers
+              user_handlers, \
+              reminders_editor_handlers

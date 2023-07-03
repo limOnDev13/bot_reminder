@@ -3,9 +3,11 @@ import logging
 
 import asyncpg
 from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.memory import MemoryStorage
+
 from keyboards import set_main_menu
 from config_data import Config, load_config
-from handlers import other_handlers, user_handlers
+from handlers import other_handlers, user_handlers, reminders_editor_handlers
 from middlewares import DataBaseMiddleware
 
 
@@ -24,7 +26,8 @@ async def main():
     config: Config = load_config(None)
     bot: Bot = Bot(token=config.tg_bot.token,
                    parse_mode='HTML')
-    dp: Dispatcher = Dispatcher()
+    storage: MemoryStorage = MemoryStorage()
+    dp: Dispatcher = Dispatcher(storage=storage)
 
     await set_main_menu(bot)
 
@@ -37,6 +40,7 @@ async def main():
 
     dp.update.middleware.register(DataBaseMiddleware(pool_connect))
 
+    dp.include_router(reminders_editor_handlers.router)
     dp.include_router(user_handlers.router)
     dp.include_router(other_handlers.router)
 
