@@ -2,7 +2,7 @@
 Модуль с методами для взаимодействия с базами данных
 """
 from . connection_pool import DataBaseClass
-from datetime import datetime, date
+from datetime import date, time
 from typing import List
 from asyncpg import Record
 
@@ -69,3 +69,72 @@ async def select_reminders(connector: DataBaseClass,
 
     request_result: List[Record] = await connector.execute(command, *args, fetch=True)
     return request_result
+
+
+async def select_chosen_reminder(connector: DataBaseClass, reminder_id: int) -> Record:
+    command: str = \
+        """
+        SELECT reminder_date, reminder_time, reminder_text
+        FROM "Reminders"
+        WHERE reminder_id = $1
+        """
+    return await connector.execute(command, reminder_id, fetchrow=True)
+
+
+async def delete_reminder(connector: DataBaseClass, reminder_id: int) -> None:
+    command = \
+        """
+        DELETE FROM "Reminders"
+        WHERE reminder_id = $1;
+        """
+    await connector.execute(command, reminder_id, execute=True)
+
+
+async def update_reminder_text(connector: DataBaseClass,
+                               reminder_id: int,
+                               new_reminder_text: str) -> None:
+    command = \
+        """
+        UPDATE "Reminders"
+        SET reminder_text = $1
+        WHERE reminder_id = $2;
+        """
+    await connector.execute(command, *[new_reminder_text, reminder_id],
+                            execute=True)
+
+
+async def update_reminder_date(connector: DataBaseClass,
+                               reminder_id: int,
+                               new_reminder_date: date) -> None:
+    command = \
+        """
+        UPDATE "Reminders"
+        SET reminder_date = $1
+        WHERE reminder_id = $2;
+        """
+    await connector.execute(command, *[new_reminder_date, reminder_id],
+                            execute=True)
+
+
+async def update_reminder_time(connector: DataBaseClass,
+                               reminder_id: int,
+                               new_reminder_time: time):
+    command = \
+        """
+        UPDATE "Reminders"
+        SET reminder_time = $1
+        WHERE reminder_id = $2
+        """
+    await connector.execute(command, *[new_reminder_time, reminder_id],
+                            execute=True)
+
+
+async def show_all_reminders(connector: DataBaseClass,
+                             user_id: int) -> List[Record]:
+    command = \
+        """
+        SELECT * FROM "Reminders"
+        WHERE user_id = $1
+        ORDER BY reminder_date, reminder_time
+        """
+    return await connector.execute(command, user_id, fetch=True)

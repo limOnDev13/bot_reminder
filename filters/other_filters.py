@@ -2,7 +2,7 @@
 Модуль, в котором реализованы специальные фильтры на ввод даты и времени
 """
 from aiogram.filters import BaseFilter
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 
 from typing import List
 from datetime import date, time, datetime
@@ -48,7 +48,6 @@ class InputIsTime(BaseFilter):
     """
     Класс-фильтр для проверки валидности введенного времени
     """
-
     async def __call__(self, message: Message) -> bool | dict[str, bool | datetime]:
         input_time = message.text.lstrip(' \n\t')
         input_text: List[str] = input_time.split(':')
@@ -72,4 +71,17 @@ class InputIsTime(BaseFilter):
             return False
 
 
+class ItIsInlineButtonWithReminder(BaseFilter):
+    """
+    Класс-фильтр для проверки callback, начинающийся на view
+     (с таким префиксом сохраняются инлайн-кнопки с какой-нибудь заметкой)
+    """
+    async def __call__(self, callback: CallbackQuery) -> bool | dict[str, int]:
+        cb_text: str = callback.data
 
+        parsed_cb_text: List[str] = cb_text.split(':')
+
+        if not parsed_cb_text[0] == 'view':
+            return False
+        else:
+            return {'reminder_id': int(parsed_cb_text[2])}

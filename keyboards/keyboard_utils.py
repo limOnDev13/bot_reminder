@@ -104,7 +104,7 @@ def build_kb_with_reminders(user_id: int,
         callback_data=str(pos_first_elem) + ' - ' + str(limit)
     )
 
-    # Последние кнопки - кнопки РЕДАКТИРОВАТЬ и УДАЛИТЬ
+    # Последние кнопки - кнопки РЕДАКТИРОВАТЬ и НАЗАД
     bt_edit: InlineKeyboardButton = InlineKeyboardButton(
         text=LEXICON_RU['edit'],
         callback_data=LEXICON_RU['edit_cb']
@@ -120,3 +120,73 @@ def build_kb_with_reminders(user_id: int,
     kb_builder.row(*[bt_edit, bt_cancel], width=2)
 
     return kb_builder.as_markup(resize_keyboard=True)
+
+
+def build_kb_with_reminder() -> InlineKeyboardMarkup:
+    kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+
+    # Предпоследние кнопки - РЕДАКТИРОВАТЬ и УДАЛИТЬ
+    bt_edit: InlineKeyboardButton = InlineKeyboardButton(
+        text=LEXICON_RU['edit'],
+        callback_data=LEXICON_RU['edit_cb']
+    )
+    bt_cancel: InlineKeyboardButton = InlineKeyboardButton(
+        text=LEXICON_RU['delete_reminder_msg'],
+        callback_data=LEXICON_RU['delete_reminder_cb']
+    )
+    # Последние кнопки - НАЗАД и НОВАЯ ЗАМЕТКА
+    bt_back_to_reminders_menu: InlineKeyboardButton = InlineKeyboardButton(
+        text=LEXICON_RU['back_msg'],
+        callback_data=LEXICON_RU['back_to_reminders_menu_cb']
+    )
+    bt_new_reminder: InlineKeyboardButton = InlineKeyboardButton(
+        text=LEXICON_RU['enter_new_reminder'],
+        callback_data=LEXICON_RU['enter_new_reminder_cb']
+    )
+
+    kb_builder.row(*[bt_edit, bt_cancel, bt_back_to_reminders_menu, bt_new_reminder], width=2)
+
+    return kb_builder.as_markup(resize_keyboard=True)
+
+
+def build_kb_to_edit_one_reminder() -> InlineKeyboardMarkup:
+    kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+
+    bt_edit_text: InlineKeyboardButton = InlineKeyboardButton(
+        text=LEXICON_RU['change_text_msg'],
+        callback_data=LEXICON_RU['change_text_cb']
+    )
+
+    bt_edit_date: InlineKeyboardButton = InlineKeyboardButton(
+        text=LEXICON_RU['change_date_msg'],
+        callback_data=LEXICON_RU['change_date_cb']
+    )
+
+    bt_edit_time: InlineKeyboardButton = InlineKeyboardButton(
+        text=LEXICON_RU['change_time_msg'],
+        callback_data=LEXICON_RU['change_time_cb']
+    )
+
+    bt_edit_complete: InlineKeyboardButton = InlineKeyboardButton(
+        text=LEXICON_RU['complete_edit_msg'],
+        callback_data=LEXICON_RU['complete_edit_cb']
+    )
+
+    kb_builder.row(*[bt_edit_text, bt_edit_date, bt_edit_time, bt_edit_complete],
+                   width=3)
+
+    return kb_builder.as_markup(resize_keyboard=True)
+
+
+def kb_with_cancel_button() -> InlineKeyboardMarkup:
+    kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+
+    bt_cancel: InlineKeyboardButton = InlineKeyboardButton(
+        text=LEXICON_RU['cancel_bt_text'],
+        callback_data=LEXICON_RU['cancel_cb']
+    )
+
+    kb_builder.row(bt_cancel, width=1)
+
+    return kb_builder.as_markup(resize_keyboard=True)
+

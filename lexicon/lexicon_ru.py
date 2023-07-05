@@ -63,5 +63,30 @@ LEXICON_RU: dict[str, str] = {
     'back_cb': 'back_cb',
     'sec_please': 'Секунду, взламываю Пентагон, чтобы просмотреть базу данных ООН.\n'
                   'И... Готово!',
-    'reminders_on_chosen_date_msg': 'Вот список заметок на '
+    'reminders_on_chosen_date_msg': 'Вот список заметок на ',
+    'enter_new_reminder': 'НОВАЯ ЗАМЕТКА',
+    'enter_new_reminder_cb': 'new_reminder',
+    'back_to_reminders_menu_cb': 'back_to_reminders_menu_cb',
+    'delete_reminder_msg': 'УДАЛИТЬ',
+    'delete_reminder_cb': 'delete_reminder_cb',
+    'reminder_was_deleted': 'Заметка была удалена.',
+    'what_edit': 'Что вы хотите изменить в напоминании?',
+    'change_text_msg': 'Текст',
+    'change_text_cb': 'change_text_cb',
+    'change_date_msg': 'Дату',
+    'change_date_cb': 'change_date_cb',
+    'change_time_msg': 'Время',
+    'change_time_cb': 'change_date_cb',
+    'complete_edit_msg': 'ГОТОВО',
+    'complete_edit_cb': 'complete_edit_cb',
+    'new_reminder_text': 'Введите новый текст',
+    'done': '\nГотово!\n',
+    'new_reminder_date': 'Введите новую дату в формате'
+                         ' ДД.ММ.ГГГГ (или ДД.ММ, или ДД)',
+    'new_reminder_time': 'Введите новое время в формате ЧЧ:ММ',
+    'wrong_format': 'Данные введены в неверном формате.'
+                    ' Пожалуйста, введите корректные данные',
+    'editing_complete_msg': 'Изменения сохранены!\nЕсли хотите сохранить новую'
+                            ' заметку, просто напишите мне;)',
+    'view_all_reminders': 'Вот список всех ваших заметок'
 }

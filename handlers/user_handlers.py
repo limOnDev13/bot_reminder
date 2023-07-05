@@ -33,7 +33,8 @@ async def process_help_command(message: Message):
 
 
 # Обработка текстового сообщения. Начинаем процесс сохранения напоминания
-@router.message(StateFilter(default_state))
+@router.message(or_f(StateFilter(default_state),
+                     StateFilter(FSMRemindersEditor.show_one_reminder)))
 async def start_saving_process(message: Message, state: FSMContext):
     await message.answer(text=LEXICON_RU['date_msg'],
                          reply_markup=build_kb_with_dates())

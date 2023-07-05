@@ -5,3 +5,4 @@ filters/__pycache__/
 keyboards/__pycache__/keyboard_utils.cpython-310.pyc
 states/__pycache__/
 handlers/__pycache__/reminders_editor_handlers.cpython-310.pyc
+utils/__pycache__
