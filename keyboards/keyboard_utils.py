@@ -93,11 +93,11 @@ def build_kb_with_reminders(user_id: int,
     # Теперь создадим кнопки для навигации по списку
     bt_previous_page: InlineKeyboardButton = InlineKeyboardButton(
         text=LEXICON_RU['previous_page'],
-        callback_data=LEXICON_RU['edit_cb']
+        callback_data=LEXICON_RU['previous_page_cb']
     )
     bt_next_page: InlineKeyboardButton = InlineKeyboardButton(
         text=LEXICON_RU['next_page'],
-        callback_data=LEXICON_RU['edit_cb']
+        callback_data=LEXICON_RU['next_page_cb']
     )
     bt_number_showed_reminders: InlineKeyboardButton = InlineKeyboardButton(
         text=str(pos_first_elem) + ' - ' + str(limit),

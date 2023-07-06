@@ -25,6 +25,9 @@ from utils import assemble_full_reminder_text
 router: Router = Router()
 
 
+PAGE_SIZE: int = 10
+
+
 # Обработка команды /reminders
 @router.message(Command(commands=['reminders']), StateFilter(default_state))
 async def process_reminders_command(message: Message, state: FSMContext):
@@ -77,11 +80,15 @@ async def show_today_or_tomorrow_reminders(message: Message,
                              user_id=message.from_user.id,
                              reminders=reminders,
                              pos_first_elem=0,
-                             with_time=True
+                             with_time=True,
+                             page_size=PAGE_SIZE
                          ))
 
     await state.update_data(date_of_showed_reminders=selected_date,
-                            show_all_reminders=False)
+                            show_all_reminders=False,
+                            reminders=reminders,
+                            pos_first_elem=0,
+                            page_size=PAGE_SIZE)
 
 
 # Хэндлер для обработки правильно введенной (по формату) даты
@@ -105,16 +112,21 @@ async def show_reminders_on_chosen_date(message: Message,
                 user_id=message.from_user.id,
                 reminders=reminders,
                 pos_first_elem=0,
-                with_time=True
+                with_time=True,
+                page_size=PAGE_SIZE
             )
         )
 
         await state.update_data(date_of_showed_reminders=valid_date,
-                                show_all_reminders=False)
+                                show_all_reminders=False,
+                                reminders=reminders,
+                                pos_first_elem=0,
+                                page_size=PAGE_SIZE)
     else:
         await message.answer(text=LEXICON_RU['past_date'])
 
 
+# Хэндлер, выводящий все заметки пользователя по нажатию на кнопку Все
 @router.message(Text(text=LEXICON_RU['all']),
                 StateFilter(FSMRemindersEditor.show_reminds))
 async def process_show_all_reminders(message: Message,
@@ -128,14 +140,77 @@ async def process_show_all_reminders(message: Message,
                              user_id=message.from_user.id,
                              reminders=reminders,
                              pos_first_elem=0,
-                             page_size=10,
+                             page_size=PAGE_SIZE,
                              with_data=True
                          ))
     await state.update_data(date_of_showed_reminders=date.today(),
-                            show_all_reminders=False)
+                            show_all_reminders=True,
+                            reminders=reminders,
+                            pos_first_elem=0,
+                            page_size=PAGE_SIZE)
+# Хэндлер на обработку остальных ответов в состоянии ввода даты
+# объединен с похожим хэндлером в user_handler.py
 
-# Хэндлер на бработку остальных ответов в состоянии ввода даты
-# объединен с похожим хэндлером в ser_handler.py
+
+# Хэндлер, для пагинации страниц в выведенном списке
+@router.callback_query(StateFilter(FSMRemindersEditor.show_reminds),
+                       Text(text=[LEXICON_RU['previous_page_cb'],
+                                  LEXICON_RU['next_page_cb']]))
+async def process_pagination(callback: CallbackQuery,
+                             state: FSMContext):
+    reminders_info = await state.get_data()
+    pos_first_elem: int = reminders_info['pos_first_elem']
+    page_size: int = reminders_info['page_size']
+    reminders: List[Record] = reminders_info['reminders']
+    all_reminders: bool = reminders_info['show_all_reminders']
+    date_of_showed_reminders: date = reminders_info['date_of_showed_reminders']
+
+    need_to_change_msg: bool
+
+    if (callback.data == LEXICON_RU['previous_page_cb']) and \
+            (pos_first_elem > 0):
+        pos_first_elem -= page_size
+        need_to_change_msg = True
+    elif (callback.data == LEXICON_RU['next_page_cb']) and\
+            (pos_first_elem + page_size < len(reminders)):
+        pos_first_elem += page_size
+        need_to_change_msg = True
+    else:
+        need_to_change_msg = False
+        await callback.answer()
+
+    if need_to_change_msg:
+        msg_text: str
+        with_data: bool = False
+        with_time: bool = False
+
+        if all_reminders:
+            msg_text = LEXICON_RU['view_all_reminders']
+            with_data = True
+        elif date_of_showed_reminders == date.today():
+            msg_text = LEXICON_RU['today_msg']
+            with_time = True
+        elif date_of_showed_reminders == date.today() + timedelta(days=1):
+            msg_text = LEXICON_RU['tomorrow_msg']
+            with_time = True
+        else:
+            msg_text = LEXICON_RU['reminders_on_chosen_date_msg'] +\
+                       date_of_showed_reminders.strftime("%d.%m.%Y")
+            with_time = True
+
+        await callback.message.edit_text(text=msg_text,
+                                         reply_markup=build_kb_with_reminders(
+                                             user_id=callback.from_user.id,
+                                             reminders=reminders,
+                                             pos_first_elem=pos_first_elem,
+                                             page_size=page_size,
+                                             with_data=with_data,
+                                             with_time=with_time
+                                         ))
+
+        await state.update_data(pos_first_elem=pos_first_elem)
+        await callback.answer()
+
 
 
 # Хэндлер, реагирующий на нажатие на заметку
