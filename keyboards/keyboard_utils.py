@@ -101,7 +101,7 @@ def build_kb_with_reminders(user_id: int,
     )
     bt_number_showed_reminders: InlineKeyboardButton = InlineKeyboardButton(
         text=str(pos_first_elem) + ' - ' + str(limit),
-        callback_data=str(pos_first_elem) + ' - ' + str(limit)
+        callback_data=str(pos_first_elem) + '-' + str(limit)
     )
 
     # Последние кнопки - кнопки РЕДАКТИРОВАТЬ и НАЗАД
@@ -122,6 +122,78 @@ def build_kb_with_reminders(user_id: int,
     return kb_builder.as_markup(resize_keyboard=True)
 
 
+class ListRemindersEditorCallbackFactory(CallbackData, prefix='del'):
+    user_id: int
+    reminder_id: int
+
+
+# Билдер клавиатуры с кнопками для удаления заметок из списка
+def build_kb_to_edit_list_reminders(user_id: int,
+                                    reminders: List[Record],
+                                    pos_first_elem: int,
+                                    page_size: int = 10,
+                                    with_date: bool = False,
+                                    with_time: bool = False) -> InlineKeyboardMarkup:
+    kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+
+    # Соберем кнопки с самими заметками. Если было указано конкретная дата,
+    # то на кнопках будут указаны их время. Если нужно вывести все заметки,
+    # то будут указаны даты
+    buttons_to_delete_reminders: List[InlineKeyboardButton] = []
+    limit = pos_first_elem + page_size
+    if len(reminders) < limit:
+        limit = len(reminders)
+
+    for num in range(pos_first_elem, limit):
+        button_text: str = '❌ '
+        if with_date:
+            reminder_date: date = reminders[num]['reminder_date']
+            button_text += reminder_date.strftime("%d.%m.%Y") + ' '
+        if with_time:
+            reminder_time: time = reminders[num]['reminder_time']
+            button_text += reminder_time.strftime("%H:%M") + ' '
+
+        button_text += reminders[num]['reminder_text'][:100]
+
+        button: InlineKeyboardButton = InlineKeyboardButton(
+            text=button_text,
+            callback_data=ListRemindersEditorCallbackFactory(
+                user_id=user_id,
+                reminder_id=reminders[num]['reminder_id']
+            ).pack()
+        )
+
+        buttons_to_delete_reminders.append(button)
+
+    # Теперь создадим кнопки для навигации по списку
+    bt_previous_page: InlineKeyboardButton = InlineKeyboardButton(
+        text=LEXICON_RU['previous_page'],
+        callback_data=LEXICON_RU['previous_page_cb']
+    )
+    bt_next_page: InlineKeyboardButton = InlineKeyboardButton(
+        text=LEXICON_RU['next_page'],
+        callback_data=LEXICON_RU['next_page_cb']
+    )
+    bt_number_showed_reminders: InlineKeyboardButton = InlineKeyboardButton(
+        text=str(pos_first_elem) + ' - ' + str(limit),
+        callback_data=str(pos_first_elem) + '-' + str(limit)
+    )
+
+    # Последние кнопка - ОТМЕНА
+    bt_cancel: InlineKeyboardButton = InlineKeyboardButton(
+        text=LEXICON_RU['cancel_bt_text'],
+        callback_data=LEXICON_RU['cancel_cb']
+    )
+
+    kb_builder.row(*buttons_to_delete_reminders, width=1)
+    kb_builder.row(*[bt_previous_page, bt_number_showed_reminders, bt_next_page],
+                   width=3)
+    kb_builder.row(bt_cancel, width=1)
+
+    return kb_builder.as_markup(resize_keyboard=True)
+
+
+# Клавиатура, которая присылается для просмотра одной заметки
 def build_kb_with_reminder() -> InlineKeyboardMarkup:
     kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
 
@@ -149,6 +221,7 @@ def build_kb_with_reminder() -> InlineKeyboardMarkup:
     return kb_builder.as_markup(resize_keyboard=True)
 
 
+# Клавиатура, которая присылается для редактирования одной заметки
 def build_kb_to_edit_one_reminder() -> InlineKeyboardMarkup:
     kb_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
 

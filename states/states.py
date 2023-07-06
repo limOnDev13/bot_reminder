@@ -10,6 +10,7 @@ class FSMReminderCreating(StatesGroup):
 
 
 class FSMRemindersEditor(StatesGroup):
+    fill_date_to_show_reminders = State()
     show_reminds = State()
     edit_reminds = State()
     show_one_reminder = State()

@@ -85,3 +85,35 @@ class ItIsInlineButtonWithReminder(BaseFilter):
             return False
         else:
             return {'reminder_id': int(parsed_cb_text[2])}
+
+
+class ItIsPageNumber(BaseFilter):
+    """
+    Класс-фильтр для проверки callback кнопки с номером страницы в списке заметок
+    """
+    async def __call__(self, callback: CallbackQuery) -> bool:
+        cb_text: str = callback.data
+
+        parsed_cb_text: List[str] = cb_text.split('-')
+        if (len(parsed_cb_text) == 2) and \
+                parsed_cb_text[0].isdigit() and parsed_cb_text[1].isdigit():
+            return True
+        else:
+            return False
+
+
+class ItIsReminderForDeleting(BaseFilter):
+    """
+    Класс-фильтр для удаления напоминания при нажатии на заметку в
+     списке в режиме удаления
+    """
+    async def __call__(self, callback: CallbackQuery) -> bool | dict[str, int]:
+        cb_text: str = callback.data
+
+        parsed_cb_text: List[str] = cb_text.split(':')
+
+        if (len(parsed_cb_text) == 3) and (parsed_cb_text[0] == 'del') and \
+                (parsed_cb_text[1].isdigit()) and (parsed_cb_text[2].isdigit()):
+            return {'reminder_id': int(parsed_cb_text[2])}
+        else:
+            return False

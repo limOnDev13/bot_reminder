@@ -4,4 +4,6 @@
 анонимная функция получается слишком громоздкой)
 """
 from . import is_admin, language_filter
-from .other_filters import InputIsDate, InputIsTime, ItIsInlineButtonWithReminder
+from .other_filters import (InputIsDate, InputIsTime,
+                            ItIsInlineButtonWithReminder, ItIsPageNumber,
+                            ItIsReminderForDeleting)

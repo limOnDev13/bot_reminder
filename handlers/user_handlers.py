@@ -11,7 +11,7 @@ from datetime import date, timedelta, datetime
 
 from keyboards import build_kb_with_dates, build_kb_with_one_cancel
 from lexicon import LEXICON_RU
-from states import FSMReminderCreating, FSMRemindersEditor
+from states import FSMReminderCreating
 from database import DataBaseClass, add_new_user, add_reminder
 from filters import InputIsDate, InputIsTime
 
@@ -33,8 +33,7 @@ async def process_help_command(message: Message):
 
 
 # Обработка текстового сообщения. Начинаем процесс сохранения напоминания
-@router.message(or_f(StateFilter(default_state),
-                     StateFilter(FSMRemindersEditor.show_one_reminder)))
+@router.message(StateFilter(default_state))
 async def start_saving_process(message: Message, state: FSMContext):
     await message.answer(text=LEXICON_RU['date_msg'],
                          reply_markup=build_kb_with_dates())
@@ -88,9 +87,8 @@ async def process_input_date(message: Message,
 
 
 # Этот хэндлер будет отлавливать все остальные апдейты
-# в состоянии fill_date и FSMRemindersEditor.show_reminds
-@router.message(or_f(StateFilter(FSMReminderCreating.fill_date),
-                     StateFilter(FSMRemindersEditor.show_reminds)))
+# в состоянии fill_date
+@router.message(StateFilter(FSMReminderCreating.fill_date))
 async def process_wrong_input_date(message: Message):
     await message.answer(text=LEXICON_RU['wrong_format_date_msg'])
 

@@ -6,3 +6,6 @@ keyboards/__pycache__/keyboard_utils.cpython-310.pyc
 states/__pycache__/
 handlers/__pycache__/reminders_editor_handlers.cpython-310.pyc
 utils/__pycache__
+handlers/__pycache__/edit_one_reminder_handlers.cpython-310.pyc
+handlers/__pycache__/handlers_to_edit_list_reminders.cpython-310.pyc
+handlers/__pycache__/show_one_reminder_handler.cpython-310.pyc

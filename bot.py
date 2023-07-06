@@ -7,7 +7,9 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 from keyboards import set_main_menu
 from config_data import Config, load_config
-from handlers import other_handlers, user_handlers, reminders_editor_handlers
+from handlers import (other_handlers, user_handlers, reminders_editor_handlers,
+                      handlers_to_edit_list_reminders, show_one_reminder_handler,
+                      edit_one_reminder_handlers)
 from middlewares import DataBaseMiddleware
 
 
@@ -41,6 +43,9 @@ async def main():
     dp.update.middleware.register(DataBaseMiddleware(pool_connect))
 
     dp.include_router(reminders_editor_handlers.router)
+    dp.include_router(handlers_to_edit_list_reminders.router)
+    dp.include_router(show_one_reminder_handler.router)
+    dp.include_router(edit_one_reminder_handlers.router)
     dp.include_router(user_handlers.router)
     dp.include_router(other_handlers.router)
 
