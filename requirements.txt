@@ -2,3 +2,4 @@ aiogram>=3.0.0b7
 asyncpg
 asyncio
 environs
+aioschedule

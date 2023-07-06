@@ -3,13 +3,11 @@
  одного напоминания
 """
 from aiogram import Router
-from aiogram.filters import Command, Text, StateFilter, or_f
-from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
+from aiogram.filters import Text, StateFilter, or_f
+from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import default_state
-from datetime import date, timedelta, datetime, time
-from asyncpg import Record
-from typing import List, Any
+from datetime import date, datetime, time
+from typing import Any
 
 from keyboards import (build_kb_to_choose_date_to_show, build_kb_with_reminders,
                        build_kb_with_reminder, build_kb_to_edit_one_reminder,
