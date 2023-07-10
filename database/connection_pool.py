@@ -2,7 +2,7 @@
 Модуль, для создания и хранения пула подключения в классе
 """
 from asyncpg.pool import Pool
-from asyncpg import Connection
+from typing import List, Tuple, Any
 
 
 class DataBaseClass:
@@ -22,3 +22,7 @@ class DataBaseClass:
             return await self.pool.fetchrow(command, *args)
         elif execute:
             return await self.pool.execute(command, *args)
+
+    async def executemany(self, command: str,
+                          input_data: List[Tuple[Any]]):
+        return await self.pool.executemany(command, input_data)

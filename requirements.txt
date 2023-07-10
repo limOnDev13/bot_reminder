@@ -1,5 +1,5 @@
 aiogram>=3.0.0b7
-asyncpg
+asyncpg==0.28.0
 asyncio
 environs
-aioschedule
+APScheduler
