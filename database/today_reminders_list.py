@@ -5,9 +5,13 @@ from typing import List, Tuple
 from asyncpg import Record
 from datetime import time, date, datetime
 from asyncpg.pool import Pool
+from apscheduler.job import Job
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from aiogram import Bot
+from datetime import datetime, timedelta
 
 from database import DataBaseClass, delete_some_reminders
-
+from services import services
 
 class TodayRemindersClass:
     """
@@ -105,4 +109,31 @@ class TodayRemindersClass:
     def clear(self):
         self.today_reminders.clear()
         self.count = 0
+
+
+class TodayRemindersClass2:
+    def __init__(self, scheduler: AsyncIOScheduler, bot: Bot, pool: Pool):
+        self.scheduler: AsyncIOScheduler = scheduler
+        self.bot: Bot = bot
+        self.pool: Pool = pool
+
+        self.today_reminders: List[Record] = []
+        self.count: int = 0
+        self.jobs_ids_with_reminders_ids: dict[int, Job]
+
+    def push(self, rows: List[Record]):
+        self.today_reminders += rows
+
+    def pop(self, reminder_id: int):
+        index: int = 0
+
+        for reminder in self.today_reminders:
+            if reminder['reminder_id'] == reminder_id:
+                self.today_reminders.pop(index)
+                break
+            else:
+                index += 1
+
+    def _planning_to_send_reminder(self) -> Job:
+        pass
 

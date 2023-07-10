@@ -13,7 +13,7 @@ from database import DataBaseClass, get_today_reminders, TodayRemindersClass
 # Функция, которая ежедневно в 00:00 выгружает список всех заметок
 # в словарь | список (пока не решил как удобнее).
 async def save_list_today_reminders(pool: Pool,
-                                    today_reminders: TodayRemindersClass):
+                                    today_reminders: List[Record]):
     async with pool.acquire() as connection:
         # Очистим список заметок (на всякий случай)
         today_reminders.clear()

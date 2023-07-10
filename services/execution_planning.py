@@ -2,6 +2,7 @@
 Модуль, который отвечает за планирование выполнения задач из бизнес-логики
 """
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.job import Job
 from asyncpg.pool import Pool
 from aiogram import Bot
 from datetime import datetime, timedelta
@@ -23,9 +24,9 @@ def planning_get_today_reminders(scheduler: AsyncIOScheduler,
 def planning_send_appropriate_reminder(scheduler: AsyncIOScheduler,
                                        bot: Bot,
                                        pool_connect: Pool,
-                                       today_reminders: TodayRemindersClass):
-    scheduler.add_job(services.send_appropriate_reminder, trigger='date',
-                      run_date=today_reminders.get_near_datetime(),
-                      kwargs={'bot': bot,
-                              'pool': pool_connect,
-                              'today_reminders_list': today_reminders})
+                                       today_reminders: TodayRemindersClass) -> Job:
+    return scheduler.add_job(services.send_appropriate_reminder, trigger='date',
+                             run_date=today_reminders.get_near_datetime(),
+                             kwargs={'bot': bot,
+                                     'pool': pool_connect,
+                                     'today_reminders_list': today_reminders})
