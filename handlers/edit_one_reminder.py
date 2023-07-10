@@ -9,16 +9,12 @@ from aiogram.fsm.context import FSMContext
 from datetime import date, datetime, time
 from typing import Any
 
-from keyboards import (build_kb_to_choose_date_to_show, build_kb_with_reminders,
-                       build_kb_with_reminder, build_kb_to_edit_one_reminder,
-                       kb_with_cancel_button)
+from keyboards import build_kb_to_edit_one_reminder, kb_with_cancel_button
 from lexicon import LEXICON_RU
 from states import FSMRemindersEditor
-from database import (DataBaseClass, select_reminders, select_chosen_reminder,
-                      delete_reminder, update_reminder_text, update_reminder_date,
-                      update_reminder_time, show_all_reminders)
-from filters import (InputIsDate, ItIsInlineButtonWithReminder, InputIsTime,
-                     ItIsPageNumber)
+from database import (DataBaseClass, update_reminder_text, update_reminder_date,
+                      update_reminder_time)
+from filters import InputIsDate, InputIsTime
 from utils import assemble_full_reminder_text
 
 

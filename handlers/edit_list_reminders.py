@@ -9,20 +9,24 @@ from typing import List, Any
 from keyboards import (build_kb_to_edit_list_reminders, build_kb_with_reminders)
 from lexicon import LEXICON_RU
 from states import FSMRemindersEditor
-from database import (DataBaseClass, delete_reminder)
+from database import (DataBaseClass, delete_reminder, TodayRemindersClass)
 from filters import (ItIsReminderForDeleting)
 
 
 router: Router = Router()
 
 
-# Хэндлер, реагирующий на нажатие на кнопку в режиме редактирования списка напоминаний
+# Хэндлер, реагирующий на нажатие на кнопку с заметкой в режиме редактирования
+# списка напоминаний
 @router.callback_query(StateFilter(FSMRemindersEditor.edit_reminds),
                        ItIsReminderForDeleting())
 async def process_delete_reminder_from_list(callback: CallbackQuery,
                                             state: FSMContext,
                                             database: DataBaseClass,
-                                            reminder_id: int):
+                                            reminder_id: int,
+                                            today_reminders: TodayRemindersClass):
+    # Если есть, удаляем из списка сегодняшних заметок
+    today_reminders.delete(reminder_id)
     # Удаляем из бд
     await delete_reminder(connector=database, reminder_id=reminder_id)
 

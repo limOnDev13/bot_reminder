@@ -8,9 +8,9 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from keyboards import set_main_menu
 from config_data import Config, load_config
-from handlers import (other_handlers, reminders_editor_handlers,
-                      handlers_to_edit_list_reminders, show_one_reminder_handler,
-                      edit_one_reminder_handlers, adding_new_reminder)
+from handlers import (other_handlers, show_some_reminders,
+                      edit_list_reminders, show_one_reminder,
+                      edit_one_reminder, adding_new_reminder)
 from middlewares import DataBaseMiddleware, SchedulerMiddleware,\
     TodayRemindersMiddleware
 from database import TodayRemindersClass
@@ -63,10 +63,10 @@ async def main():
     dp.update.middleware.register(SchedulerMiddleware(scheduler))
     dp.update.middleware.register(TodayRemindersMiddleware(today_reminders))
     # Регистрируем роутеры
-    dp.include_router(reminders_editor_handlers.router)
-    dp.include_router(handlers_to_edit_list_reminders.router)
-    dp.include_router(show_one_reminder_handler.router)
-    dp.include_router(edit_one_reminder_handlers.router)
+    dp.include_router(show_some_reminders.router)
+    dp.include_router(edit_list_reminders.router)
+    dp.include_router(show_one_reminder.router)
+    dp.include_router(edit_one_reminder.router)
     dp.include_router(adding_new_reminder.router)
     dp.include_router(other_handlers.router)
 

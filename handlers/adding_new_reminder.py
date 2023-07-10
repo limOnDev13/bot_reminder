@@ -8,7 +8,8 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from datetime import date, timedelta, datetime
-from typing import Any
+from typing import Any, List
+from asyncpg import Record
 
 from keyboards import build_kb_with_dates, build_kb_with_one_cancel
 from lexicon import LEXICON_RU
@@ -118,7 +119,8 @@ async def process_input_time(message: Message,
                              selected_more_current: bool,
                              valid_time: datetime,
                              state: FSMContext,
-                             database: DataBaseClass):
+                             database: DataBaseClass,
+                             today_reminders: TodayRemindersClass):
     current_date: date = datetime.today().date()
     # Получим ранее введенную дату
     saved_data: dict[str, Any] = await state.get_data()
@@ -132,13 +134,17 @@ async def process_input_time(message: Message,
         saved_text: str = saved_data['text']
 
         # Добавим новую заметку в базу данных
-        await add_reminder(
+        reminder: Record = await add_reminder(
             connector=database,
             user_id=message.from_user.id,
             reminder_date=saved_date,
             reminder_time=valid_time.time(),
             reminder_text=saved_text
         )
+        # Если была выбрана сегодняшняя дата
+        if saved_date == current_date:
+            # Добавим заметку в список сегодняшних заметок
+            today_reminders.push(reminder)
 
         # Сообщаем пользователю, что заметка успешно сохранена
         await message.answer(text=LEXICON_RU['successful_saving'],

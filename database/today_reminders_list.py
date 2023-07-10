@@ -3,7 +3,6 @@
 """
 from typing import List, Tuple
 from asyncpg import Record
-from operator import itemgetter
 from datetime import time, date, datetime
 from asyncpg.pool import Pool
 
@@ -37,12 +36,12 @@ class TodayRemindersClass:
     # Добавляем элементы в стек и сортируем обновленный список
     # (схема: сначала добавляем в базу данных, потом в оперативную память, в конце
     # в список сегодняшних заметок)
-    def push(self, rows: List[Record]):
+    def push(self, rows: Record):
         # Добавляем новые строки
         self.today_reminders += rows
         self.count += len(rows)
         # Сортируем
-        self.today_reminders.sort(key=itemgetter('reminder_time'))
+        self.today_reminders.sort(key=lambda d: d['reminder_time'])
         # Обновляем информацию о ближайших заметках
         self._find_near_reminders()
 
@@ -78,22 +77,20 @@ class TodayRemindersClass:
     # Удаляем заметку по reminder_id
     # (схема: сначала удаляем из базы данных, потом из оперативной памяти, в конце
     # из списка сегодняшних заметок)
-    def delete(self, reminder_on_deletion: Record):
-        # Если дата заметки совпадает с сегодняшней
-        if reminder_on_deletion['reminder_id'] == date.today():
-            index: int = 0
-            # Найдем необходимую заметку
-            for reminder in self.today_reminders:
-                if reminder['reminder_id'] == reminder_on_deletion['reminder_id']:
-                    self.today_reminders.pop(index)
-                    break
-                else:
-                    index += 1
-            # Обновим информацию о ближайших заметках
+    def delete(self, reminder_on_deletion_id: int):
+        index: int = 0
+        # Найдем необходимую заметку
+        for reminder in self.today_reminders:
+            if reminder['reminder_id'] == reminder_on_deletion_id:
+                self.today_reminders.pop(index)
+                break
+            else:
+                index += 1
+        # Если индекс меньше длины массива
+        if index < len(self.today_reminders):
+            # в списке была такая заметка, поэтому обновим информацию
+            # о ближайших заметках
             self._find_near_reminders()
-        else:
-            print('Напоминание было назначено не на сегодня,'
-                  ' поэтому ее нет в этом списке')
 
     # Вернем полную ближайшую дату - время
     def get_near_datetime(self) -> datetime:

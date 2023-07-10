@@ -3,7 +3,7 @@
 """
 from . connection_pool import DataBaseClass
 from datetime import date, time
-from typing import List, Tuple, Any
+from typing import List, Tuple
 from asyncpg import Record
 
 
@@ -26,22 +26,38 @@ async def add_reminder(connector: DataBaseClass,
                        user_id: int,
                        reminder_date: date,
                        reminder_time: time,
-                       reminder_text: str):
-    command = \
+                       reminder_text: str) -> Record:
+    # Добавим заметку в базу данных
+    command1 = \
         """
         INSERT INTO "Reminders"
-        VALUES(DEFAULT, $1, $2, $3, $4, $5)
+        VALUES(DEFAULT, $1, $2, $3, $4, $5, $6)
         ON CONFLICT (reminder_id) DO UPDATE
             SET reminder_date = excluded.reminder_date,
                 reminder_time = excluded.reminder_time,
                 reminder_text = excluded.reminder_text;
         """
-    await connector.execute(command, *[user_id,
-                                       reminder_date,
-                                       reminder_time,
-                                       reminder_text,
-                                       ''],
+    await connector.execute(command1, *[user_id, reminder_date,
+                                        reminder_time, reminder_text,
+                                        '', True],
                             execute=True)
+    # Получим последнюю заметку
+    command2 = \
+        """
+        SELECT * FROM "Reminders"
+        WHERE last_reminder = True
+        """
+    result_reminder = await connector.execute(command2, fetch=True)
+    # Изменим у последней заметки параметр last_reminder на False
+    command3 = \
+        """
+        UPDATE "Reminders"
+        SET last_reminder = False
+        WHERE last_reminder = True;
+        """
+    await connector.execute(command3, execute=True)
+
+    return result_reminder
 
 
 # Выберем в таблице Reminders заметки на выбранную дату или все заметки

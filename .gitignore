@@ -14,3 +14,7 @@ handlers/__pycache__/adding_new_reminder.cpython-310.pyc
 middlewares/__pycache__/other_middlewares.cpython-310.pyc
 middlewares/__pycache__/scheduler_middleware.cpython-310.pyc
 services/__pycache__/execution_planning.cpython-310.pyc
+handlers/__pycache__/edit_list_reminders.cpython-310.pyc
+handlers/__pycache__/edit_one_reminder.cpython-310.pyc
+handlers/__pycache__/show_one_reminder.cpython-310.pyc
+handlers/__pycache__/show_some_reminders.cpython-310.pyc
