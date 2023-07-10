@@ -24,8 +24,8 @@ async def add_new_user(connector: DataBaseClass,
 # Добавим в таблицу Reminders новую заметку
 async def add_reminder(connector: DataBaseClass,
                        user_id: int,
-                       reminder_date: str,
-                       reminder_time: str,
+                       reminder_date: date,
+                       reminder_time: time,
                        reminder_text: str):
     command = \
         """
