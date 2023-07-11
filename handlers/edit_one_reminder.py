@@ -6,6 +6,7 @@ from aiogram import Router
 from aiogram.filters import Text, StateFilter, or_f
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
+from asyncpg import Record
 from datetime import date, datetime, time
 from typing import Any
 
@@ -53,10 +54,12 @@ async def process_enter_new_text(message: Message,
     # Если дата заметки - сегодня
     if reminder_info['reminder_date'] == date.today():
         # Изменим соответствующую заметку в списке сегодняшних заметок
-        today_reminders.edit_reminder(
-            reminder_id=reminder_info['reminder_id'],
-            new_text=message.text
+        new_reminder: Record = await select_chosen_reminder(
+            connector=database,
+            reminder_id=reminder_info['reminder_id']
         )
+        today_reminders.delete(new_reminder)
+        today_reminders.push([new_reminder])
 
     # Покажем обновленную заметку и спросим что еще нужно изменить
     reminder_date = reminder_info['reminder_date']
@@ -178,10 +181,13 @@ async def process_enter_new_date(message: Message,
         # Если дата заметки - сегодня
         if reminder_info['reminder_date'] == date.today():
             # Изменим соответствующую заметку в списке сегодняшних заметок
-            today_reminders.edit_reminder(
-                reminder_id=reminder_info['reminder_id'],
-                new_time=valid_time.time()
+            new_reminder: Record = await select_chosen_reminder(
+                connector=database,
+                reminder_id=reminder_info['reminder_id']
             )
+            print(new_reminder['reminder_id'])
+            today_reminders.delete(new_reminder)
+            today_reminders.push([new_reminder])
 
         # Покажем пользователю обновленную заметку и спросим, что еще нужно изменить
         await message.answer(text=assemble_full_reminder_text(reminder_text,

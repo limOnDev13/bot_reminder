@@ -4,7 +4,8 @@ from typing import List
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime
 
-from database import DataBaseClass, get_today_reminders, TodayRemindersClass
+from database import (DataBaseClass, get_today_reminders, TodayRemindersClass,
+                      delete_irrelevant_reminders)
 
 
 def plan_cron_save_today_reminders(scheduler: AsyncIOScheduler,
@@ -34,8 +35,11 @@ async def _save_list_today_reminders(pool: Pool,
     async with pool.acquire() as connection:
         # Очистим список заметок (на всякий случай)
         today_reminders.clear()
-        # Получим заметки на сегодня из базы данных
+
         database: DataBaseClass = DataBaseClass(connection)
+        # Удалим неактуальные заметки
+        await delete_irrelevant_reminders(database)
+        # Получим заметки на сегодня из базы данных
         new_rows: List[Record] = await get_today_reminders(database)
         # Добавим в хранилище сегодняшних заметок
         today_reminders.push(new_rows)

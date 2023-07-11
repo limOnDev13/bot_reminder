@@ -21,12 +21,7 @@ class TodayRemindersClass:
 
     # Добавляем заметку в список запланированных сообщений
     def push(self, reminders: List[Record]):
-
-        print(f'reminders = {reminders}')
-
         for reminder in reminders:
-
-            print(f'reminder = {reminder}')
 
             # Проверим, что такой заметки пока не запланировано
             is_reminder_in_today_list: bool = False
@@ -53,18 +48,10 @@ class TodayRemindersClass:
             else:
                 index += 1
 
-    def edit_reminder(self, reminder_id: int,
-                      new_text: bool | str = False,
-                      new_time: bool | time = False):
+    def edit_reminder(self, new_reminder: Record):
         for reminder in self.today_reminders:
             # Если в списке заметок есть полученная заметка
-            if reminder_id == reminder['reminder_id']:
-                # Если ввели новый текст
-                if new_text:
-                    reminder['reminder_text'] = new_text
-                # Если ввели новое время
-                elif new_time:
-                    reminder['reminder_time'] = new_time
+            if new_reminder['reminder_id'] == reminder['reminder_id']:
                 # Изменим запланированную отправку сообщения
                 self._modify_planned_send_reminder(reminder=reminder)
                 # Выйдем из цикла
@@ -109,6 +96,3 @@ class TodayRemindersClass:
                                                 r_time=reminder['reminder_time']),
             kwargs={'reminder': reminder})
 
-    def _modify_planned_send_reminder(self, reminder: Record):
-        self.scheduler.modify_job(job_id=str(reminder['reminder_id']),
-                                  kwargs={'reminder': reminder})

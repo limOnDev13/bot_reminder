@@ -2,7 +2,7 @@
 Модуль с методами для взаимодействия с базами данных
 """
 from . connection_pool import DataBaseClass
-from datetime import date, time
+from datetime import date, time, datetime
 from typing import List, Tuple
 from asyncpg import Record
 
@@ -94,7 +94,7 @@ async def select_reminders(connector: DataBaseClass,
 async def select_chosen_reminder(connector: DataBaseClass, reminder_id: int) -> Record:
     command: str = \
         """
-        SELECT reminder_date, reminder_time, reminder_text
+        SELECT *
         FROM "Reminders"
         WHERE reminder_id = $1
         """
@@ -185,3 +185,14 @@ async def delete_some_reminders(connector: DataBaseClass,
         WHERE reminder_id = $1;
         """
     await connector.executemany(command, input_data)
+
+
+# Удалим неактуальные заметки
+async def delete_irrelevant_reminders(connector: DataBaseClass):
+    command = \
+        """
+        DELETE FROM "Reminders"
+        WHERE reminder_time < $1 AND reminder_date = $2;
+        """
+    await connector.execute(command, *[datetime.now().time(), date.today()],
+                            execute=True)
