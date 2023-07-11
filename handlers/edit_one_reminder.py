@@ -13,7 +13,8 @@ from keyboards import build_kb_to_edit_one_reminder, kb_with_cancel_button
 from lexicon import LEXICON_RU
 from states import FSMRemindersEditor
 from database import (DataBaseClass, update_reminder_text, update_reminder_date,
-                      update_reminder_time)
+                      update_reminder_time, TodayRemindersClass,
+                      select_chosen_reminder)
 from filters import InputIsDate, InputIsTime
 from utils import assemble_full_reminder_text
 
@@ -38,7 +39,8 @@ async def process_edit_reminder_text(callback: CallbackQuery,
 @router.message(StateFilter(FSMRemindersEditor.new_text))
 async def process_enter_new_text(message: Message,
                                  state: FSMContext,
-                                 database: DataBaseClass):
+                                 database: DataBaseClass,
+                                 today_reminders: TodayRemindersClass):
     # Обновим базу данных
     reminder_info = await state.get_data()
 
@@ -47,6 +49,14 @@ async def process_enter_new_text(message: Message,
 
     # Обновим информацию в оперативной памяти
     await state.update_data(reminder_text=message.text)
+
+    # Если дата заметки - сегодня
+    if reminder_info['reminder_date'] == date.today():
+        # Изменим соответствующую заметку в списке сегодняшних заметок
+        today_reminders.edit_reminder(
+            reminder_id=reminder_info['reminder_id'],
+            new_text=message.text
+        )
 
     # Покажем обновленную заметку и спросим что еще нужно изменить
     reminder_date = reminder_info['reminder_date']
@@ -81,7 +91,8 @@ async def process_edit_reminder_date(callback: CallbackQuery,
 async def process_enter_new_date(message: Message,
                                  database: DataBaseClass,
                                  state: FSMContext,
-                                 valid_date: bool | datetime):
+                                 valid_date: bool | datetime,
+                                 today_reminders: TodayRemindersClass):
     # Если пользователь прислал валидную дату, которая ЕЩЕ НЕ прошла
     if valid_date:
         # Обновим информацию в базе данных
@@ -92,6 +103,20 @@ async def process_enter_new_date(message: Message,
 
         # Обновим информацию в оперативной памяти
         await state.update_data(reminder_date=valid_date.date())
+
+        # Получим измененную заметку
+        new_reminder = await select_chosen_reminder(
+            connector=database,
+            reminder_id=reminder_info['reminder_id']
+        )
+        # Если выбранная дата - сегодня
+        if valid_date == date.today():
+            # Добавим ее в список сегодняшних заметок
+            today_reminders.push([new_reminder])
+        # Если выбранная дата - НЕ сегодня
+        else:
+            # Удалим ее из списка сегодняшних заметок (если она там есть)
+            today_reminders.delete(reminder=new_reminder)
 
         # Отправим пользователю обновленную заметку и спросим, что еще нужно изменить
         reminder_text = reminder_info['reminder_text']
@@ -132,7 +157,8 @@ async def process_enter_new_date(message: Message,
                                  database: DataBaseClass,
                                  state: FSMContext,
                                  selected_more_current: bool,
-                                 valid_time: datetime):
+                                 valid_time: datetime,
+                                 today_reminders: TodayRemindersClass):
     # Получим информацию о заметке из оперативной памяти
     reminder_info = await state.get_data()
     reminder_text: str = reminder_info['reminder_text']
@@ -148,6 +174,14 @@ async def process_enter_new_date(message: Message,
 
         # Обновим информацию в оперативной памяти
         await state.update_data(reminder_time=valid_time.time())
+
+        # Если дата заметки - сегодня
+        if reminder_info['reminder_date'] == date.today():
+            # Изменим соответствующую заметку в списке сегодняшних заметок
+            today_reminders.edit_reminder(
+                reminder_id=reminder_info['reminder_id'],
+                new_time=valid_time.time()
+            )
 
         # Покажем пользователю обновленную заметку и спросим, что еще нужно изменить
         await message.answer(text=assemble_full_reminder_text(reminder_text,
@@ -187,6 +221,7 @@ async def process_editing_complete(callback: CallbackQuery,
     await state.clear()
 
 
+# Хэндлер, реагирующий на ввод остальных сообщений в режиме редактирования одной заметки
 @router.message(StateFilter(FSMRemindersEditor.edit_one_reminder))
 async def process_other_msg_in_edit_one_reminder_mod(message: Message,
                                                      state: FSMContext):

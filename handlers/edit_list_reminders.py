@@ -9,7 +9,8 @@ from typing import List, Any
 from keyboards import (build_kb_to_edit_list_reminders, build_kb_with_reminders)
 from lexicon import LEXICON_RU
 from states import FSMRemindersEditor
-from database import (DataBaseClass, delete_reminder, TodayRemindersClass)
+from database import (DataBaseClass, delete_reminder, TodayRemindersClass,
+                      select_chosen_reminder)
 from filters import (ItIsReminderForDeleting)
 
 
@@ -26,7 +27,10 @@ async def process_delete_reminder_from_list(callback: CallbackQuery,
                                             reminder_id: int,
                                             today_reminders: TodayRemindersClass):
     # Если есть, удаляем из списка сегодняшних заметок
-    today_reminders.delete(reminder_id)
+    reminder: Record = await select_chosen_reminder(connector=database,
+                                                    reminder_id=reminder_id)
+    today_reminders.delete(reminder)
+
     # Удаляем из бд
     await delete_reminder(connector=database, reminder_id=reminder_id)
 

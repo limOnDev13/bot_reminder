@@ -14,7 +14,7 @@ from handlers import (other_handlers, show_some_reminders,
 from middlewares import DataBaseMiddleware, SchedulerMiddleware,\
     TodayRemindersMiddleware
 from database import TodayRemindersClass
-from services import planning_get_today_reminders, planning_send_appropriate_reminder
+from services import plan_date_save_today_reminders, plan_cron_save_today_reminders
 
 
 logger = logging.getLogger(__name__)
@@ -47,14 +47,18 @@ async def main():
                                              user=config.con_pool.user.user,
                                              password=config.con_pool.user.password
                                              )
-    today_reminders: TodayRemindersClass = TodayRemindersClass()
 
     scheduler: AsyncIOScheduler = AsyncIOScheduler()
-    planning_get_today_reminders(scheduler=scheduler, pool_connect=pool_connect,
-                                 today_reminders=today_reminders)
-    planning_send_appropriate_reminder(scheduler=scheduler, bot=bot,
-                                       pool_connect=pool_connect,
-                                       today_reminders=today_reminders)
+
+    today_reminders: TodayRemindersClass = TodayRemindersClass(
+        scheduler=scheduler,
+        bot=bot,
+        pool=pool_connect
+    )
+    plan_date_save_today_reminders(scheduler=scheduler, pool=pool_connect,
+                                   today_reminders=today_reminders)
+    plan_cron_save_today_reminders(scheduler=scheduler, pool=pool_connect,
+                                   today_reminders=today_reminders)
 
     scheduler.start()
 

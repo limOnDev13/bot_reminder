@@ -3,12 +3,12 @@
 например, для тех, кто запустил бота в первый раз.
 """
 from aiogram import Router
-from aiogram.filters import Command, CommandStart, Text, StateFilter, or_f
+from aiogram.filters import Command, CommandStart, Text, StateFilter
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from datetime import date, timedelta, datetime
-from typing import Any, List
+from typing import Any
 from asyncpg import Record
 
 from keyboards import build_kb_with_dates, build_kb_with_one_cancel
@@ -144,7 +144,7 @@ async def process_input_time(message: Message,
         # Если была выбрана сегодняшняя дата
         if saved_date == current_date:
             # Добавим заметку в список сегодняшних заметок
-            today_reminders.push(reminder)
+            today_reminders.push([reminder])
 
         # Сообщаем пользователю, что заметка успешно сохранена
         await message.answer(text=LEXICON_RU['successful_saving'],

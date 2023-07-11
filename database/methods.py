@@ -47,7 +47,7 @@ async def add_reminder(connector: DataBaseClass,
         SELECT * FROM "Reminders"
         WHERE last_reminder = True
         """
-    result_reminder = await connector.execute(command2, fetch=True)
+    result_reminder = await connector.execute(command2, fetchrow=True)
     # Изменим у последней заметки параметр last_reminder на False
     command3 = \
         """
