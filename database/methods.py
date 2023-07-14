@@ -192,7 +192,18 @@ async def delete_irrelevant_reminders(connector: DataBaseClass):
     command = \
         """
         DELETE FROM "Reminders"
-        WHERE reminder_time < $1 AND reminder_date = $2;
+        WHERE (reminder_time < $1 AND reminder_date = $2) 
+        OR (reminder_date < $2);
         """
     await connector.execute(command, *[datetime.now().time(), date.today()],
                             execute=True)
+
+
+async def set_premium(connector: DataBaseClass, user_id: int):
+    command = \
+        """
+        Update "Users"
+        SET premium = True
+        WHERE user_id = $1
+        """
+    await connector.execute(command, user_id, execute=True)

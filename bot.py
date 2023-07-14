@@ -2,8 +2,10 @@ import asyncio
 import logging
 
 import asyncpg
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, F
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types.message import ContentType
+from aiogram.filters import Command
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from keyboards import set_main_menu
@@ -11,8 +13,9 @@ from config_data import Config, load_config
 from handlers import (other_handlers, show_some_reminders,
                       edit_list_reminders, show_one_reminder,
                       edit_one_reminder, adding_new_reminder)
+from handlers.buy_premium import order, send_pre_checkout_query, successful_payment
 from middlewares import DataBaseMiddleware, SchedulerMiddleware,\
-    TodayRemindersMiddleware
+    TodayRemindersMiddleware, ProviderTokenMiddleware
 from database import TodayRemindersClass
 from services import plan_date_save_today_reminders, plan_cron_save_today_reminders
 
@@ -63,9 +66,15 @@ async def main():
     scheduler.start()
 
     # Регистрируем мидлвари
+    dp.update.middleware.register(ProviderTokenMiddleware(config.prov_token))
     dp.update.middleware.register(DataBaseMiddleware(pool_connect))
     dp.update.middleware.register(SchedulerMiddleware(scheduler))
     dp.update.middleware.register(TodayRemindersMiddleware(today_reminders))
+    # Регистрируем хэндлеры для оплаты премиума
+    dp.message.register(order, Command(commands=['pay']))
+    dp.pre_checkout_query.register(send_pre_checkout_query)
+    dp.message.register(successful_payment,
+                        F.content_type.in_({ContentType.SUCCESSFUL_PAYMENT}))
     # Регистрируем роутеры
     dp.include_router(show_some_reminders.router)
     dp.include_router(edit_list_reminders.router)

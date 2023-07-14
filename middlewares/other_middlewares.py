@@ -21,3 +21,18 @@ class TodayRemindersMiddleware(BaseMiddleware):
     ) -> Any:
         data['today_reminders'] = self.today_reminders
         return await handler(event, data)
+
+
+# Мидлварь, которая пробрасывает токен провайдера для оплаты
+class ProviderTokenMiddleware(BaseMiddleware):
+    def __init__(self, provider_token: str):
+        self.provider_token = provider_token
+
+    async def __call__(
+            self,
+            handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+            event: TelegramObject,
+            data: Dict[str, Any]
+    ) -> Any:
+        data['provider_token'] = self.provider_token
+        return await handler(event, data)

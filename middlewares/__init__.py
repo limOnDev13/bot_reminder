@@ -5,4 +5,4 @@
 """
 from .scheduler_middleware import SchedulerMiddleware
 from .db_middleware import DataBaseMiddleware
-from .other_middlewares import TodayRemindersMiddleware
+from .other_middlewares import TodayRemindersMiddleware, ProviderTokenMiddleware

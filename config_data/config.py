@@ -36,6 +36,7 @@ class ConnectionsPool:
 class Config:
     tg_bot: TgBot
     con_pool: ConnectionsPool
+    prov_token: str  # PROVIDER_TOKEN
 
 
 def load_config(path: str | None = None) -> Config:
@@ -49,4 +50,5 @@ def load_config(path: str | None = None) -> Config:
                                            user=UserDB(user=env('USER'),
                                                        password=env('PASSWORD')),
                                            min_size=int(env('POOL_MIN_SIZE')),
-                                           max_size=int(env('POOL_MAX_SIZE'))))
+                                           max_size=int(env('POOL_MAX_SIZE'))),
+                  prov_token=env('PROVIDER_TOKEN'))

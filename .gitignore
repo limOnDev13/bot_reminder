@@ -19,3 +19,4 @@ handlers/__pycache__/edit_one_reminder.cpython-310.pyc
 handlers/__pycache__/show_one_reminder.cpython-310.pyc
 handlers/__pycache__/show_some_reminders.cpython-310.pyc
 services/__pycache__/get_today_list_reminders.cpython-310.pyc
+handlers/__pycache__/buy_premium.cpython-310.pyc
