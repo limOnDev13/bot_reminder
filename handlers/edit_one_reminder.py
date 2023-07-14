@@ -169,7 +169,8 @@ async def process_enter_new_date(message: Message,
 
     # Если пользователь выбрал сегодняшний день и ввел время, которое больше чем
     # текущее (сегодня еще не прошло), или любой другой день
-    if (reminder_date == date.today()) and selected_more_current:
+    if ((reminder_date == date.today()) and selected_more_current) or\
+            (reminder_date > date.today()):
         # Обновим информацию в базе данных
         await update_reminder_time(database,
                                    reminder_info['reminder_id'],
