@@ -199,6 +199,7 @@ async def delete_irrelevant_reminders(connector: DataBaseClass):
                             execute=True)
 
 
+# Изменим премиум-статус пользователя
 async def set_premium(connector: DataBaseClass, user_id: int):
     command = \
         """
@@ -207,3 +208,33 @@ async def set_premium(connector: DataBaseClass, user_id: int):
         WHERE user_id = $1
         """
     await connector.execute(command, user_id, execute=True)
+
+
+# Проверим премиум-статус пользователя
+async def check_premium(connector: DataBaseClass, user_id: int) -> Record:
+    command = \
+        """
+        SELECT premium FROM "Users"
+        WHERE user_id = $1
+        """
+    return await connector.execute(command, user_id, fetchrow=True)
+
+
+# Получаем количество заметок
+async def get_num_reminders(connector: DataBaseClass, user_id: int) -> Record:
+    # Сначала обновим информацию о количестве, а после уже получим значение
+    command = \
+        """
+        UPDATE "Users"
+        SET num_reminders = (SELECT COUNT(*) FROM "Reminders" WHERE user_id = $1)
+        WHERE user_id = $1;
+        """
+    await connector.execute(command, user_id, execute=True)
+
+    command = \
+        """
+        SELECT num_reminders FROM "Users"
+        WHERE user_id = $1;
+        """
+    return await connector.execute(command, user_id, fetchrow=True)
+

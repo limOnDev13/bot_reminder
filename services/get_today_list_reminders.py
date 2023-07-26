@@ -46,5 +46,3 @@ async def _save_list_today_reminders(pool: Pool,
 
         # Проверка работы
         today_reminders.print()
-
-

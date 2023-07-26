@@ -3,7 +3,7 @@
 самого aiogram, или если при регистрации хэндлеров в диспетчере
 анонимная функция получается слишком громоздкой)
 """
-from . import is_admin, language_filter
+from . import is_admin
 from .other_filters import (InputIsDate, InputIsTime,
                             ItIsInlineButtonWithReminder, ItIsPageNumber,
                             ItIsReminderForDeleting)

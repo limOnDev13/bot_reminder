@@ -5,7 +5,7 @@ from aiogram.filters import BaseFilter
 from aiogram.types import Message, CallbackQuery
 
 from typing import List
-from datetime import date, time, datetime
+from datetime import date, datetime
 
 
 class InputIsDate(BaseFilter):

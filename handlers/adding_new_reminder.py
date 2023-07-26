@@ -149,6 +149,7 @@ async def process_input_time(message: Message,
         # Сообщаем пользователю, что заметка успешно сохранена
         await message.answer(text=LEXICON_RU['successful_saving'],
                              reply_markup=ReplyKeyboardRemove())
+
         # Очищаем оперативную память
         await state.clear()
     # Если пользователь ввел время, которое уже прошло

@@ -48,15 +48,6 @@ class TodayRemindersClass:
             else:
                 index += 1
 
-    def edit_reminder(self, new_reminder: Record):
-        for reminder in self.today_reminders:
-            # Если в списке заметок есть полученная заметка
-            if new_reminder['reminder_id'] == reminder['reminder_id']:
-                # Изменим запланированную отправку сообщения
-                self._modify_planned_send_reminder(reminder=reminder)
-                # Выйдем из цикла
-                break
-
     def print(self):
         for reminder in self.today_reminders:
             print(reminder)

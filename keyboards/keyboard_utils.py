@@ -9,7 +9,7 @@ from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from asyncpg import Record
 from typing import List
-from datetime import time, date, datetime
+from datetime import time, date
 
 from lexicon import LEXICON_RU
 
@@ -262,4 +262,3 @@ def kb_with_cancel_button() -> InlineKeyboardMarkup:
     kb_builder.row(bt_cancel, width=1)
 
     return kb_builder.as_markup(resize_keyboard=True)
-
