@@ -26,12 +26,15 @@ async def add_reminder(connector: DataBaseClass,
                        user_id: int,
                        reminder_date: date,
                        reminder_time: time,
-                       reminder_text: str) -> Record:
+                       reminder_text: str,
+                       file_id: str = None,
+                       file_unique_id: str = None,
+                       msg_type: str = 'text') -> Record:
     # Добавим заметку в базу данных
     command1 = \
         """
         INSERT INTO "Reminders"
-        VALUES(DEFAULT, $1, $2, $3, $4, $5, $6)
+        VALUES(DEFAULT, $1, $2, $3, $4, $5, $6, $7, $8)
         ON CONFLICT (reminder_id) DO UPDATE
             SET reminder_date = excluded.reminder_date,
                 reminder_time = excluded.reminder_time,
@@ -39,7 +42,8 @@ async def add_reminder(connector: DataBaseClass,
         """
     await connector.execute(command1, *[user_id, reminder_date,
                                         reminder_time, reminder_text,
-                                        '', True],
+                                        True, file_id, file_unique_id,
+                                        msg_type],
                             execute=True)
     # Получим последнюю заметку
     command2 = \

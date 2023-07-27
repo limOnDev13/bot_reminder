@@ -1,7 +1,7 @@
 """
 Модуль с хэндлерами для просмотра и редактирования сохраненных заметок.
 """
-from aiogram import Router
+from aiogram import Router, Bot
 from aiogram.filters import Command, Text, StateFilter, or_f
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
@@ -323,23 +323,54 @@ async def show_chosen_reminder(callback: CallbackQuery,
     reminder_date: date = reminder['reminder_date']
     reminder_time: time = reminder['reminder_time']
     reminder_text: str = reminder['reminder_text']
+    msg_type: str = reminder['msg_type']
+    user_id: int = reminder['user_id']
+    file_id: str = reminder['file_id']
 
     # Сохраним необходимую информацию в оперативной памяти
     await state.update_data(reminder_id=reminder_id,
                             reminder_text=reminder_text,
                             reminder_date=reminder_date,
-                            reminder_time=reminder_time)
+                            reminder_time=reminder_time,
+                            msg_type=msg_type)
 
     # Изменим состояние на просмотр одной заметки
     await state.set_state(FSMRemindersEditor.show_one_reminder)
 
-    # Отправим выбранную заметку пользователю
-    await callback.message.edit_text(
-        text=assemble_full_reminder_text(reminder_text,
-                                         reminder_date,
-                                         reminder_time),
-        reply_markup=build_kb_with_reminder()
-    )
+    await callback.message.delete()
+
+    if msg_type == 'text':
+        # Отправим выбранную заметку пользователю
+        await callback.message.answer(
+            text=assemble_full_reminder_text(reminder_text,
+                                             reminder_date,
+                                             reminder_time),
+            reply_markup=build_kb_with_reminder()
+        )
+    else:
+        bot: Bot = Bot.get_current()
+        caption: str | None = None
+
+        if msg_type == 'voice':
+            await bot.send_voice(user_id, voice=file_id)
+        elif msg_type == 'video_note':
+            await bot.send_video_note(user_id, video_note=file_id)
+        else:
+            caption = reminder_text
+
+            if msg_type == 'video':
+                await bot.send_video(user_id, video=file_id)
+            elif msg_type == 'photo':
+                await bot.send_photo(user_id, photo=file_id)
+            elif msg_type == 'audio':
+                await bot.send_audio(user_id, audio=file_id)
+            elif msg_type == 'document':
+                await bot.send_document(user_id, document=file_id)
+
+        await callback.message.answer(text=assemble_full_reminder_text(reminder_text=caption,
+                                                                       reminder_date=reminder_date,
+                                                                       reminder_time=reminder_time))
+
     await callback.answer()
 
 

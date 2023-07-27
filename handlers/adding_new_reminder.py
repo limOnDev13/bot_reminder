@@ -7,6 +7,7 @@ from aiogram.filters import Command, CommandStart, Text, StateFilter
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
+from aiogram.types.message import ContentType
 from datetime import date, timedelta, datetime
 from typing import Any
 from asyncpg import Record
@@ -34,14 +35,62 @@ async def process_help_command(message: Message):
     await message.answer(text=LEXICON_RU['help'])
 
 
-# Обработка текстового сообщения. Начинаем процесс сохранения напоминания
+# Обработка сообщения. Начинаем процесс сохранения напоминания
 @router.message(StateFilter(default_state))
 async def start_saving_process(message: Message, state: FSMContext):
     # Просим ввести дату напоминания
     await message.answer(text=LEXICON_RU['date_msg'],
                          reply_markup=build_kb_with_dates())
-    # Сохраняем в оперативной памяти введенный текст
-    await state.update_data(text=message.text)
+    # Если пользователь прислал текстовое сообщение
+    if message.content_type is ContentType.TEXT:
+        # Сохраняем в оперативной памяти введенный текст
+        await state.update_data(text=message.text,
+                                file_id=None,
+                                file_unique_id=None,
+                                msg_text='text')
+    # Если пользователь прислал любой другой тип
+    elif message.content_type is ContentType.PHOTO:
+        await state.update_data(
+            text=message.caption,
+            file_id=message.photo[-1].file_id,
+            file_unique_id=message.photo[-1].file_unique_id,
+            msg_type='photo'
+        )
+    elif message.content_type is ContentType.VIDEO_NOTE:
+        await state.update_data(
+            text=None,
+            file_id=message.video_note.file_id,
+            file_unique_id=message.video_note.file_unique_id,
+            msg_type='video_note'
+        )
+    elif message.content_type is ContentType.VOICE:
+        await state.update_data(
+            text=None,
+            file_id=message.voice.file_id,
+            file_unique_id=message.voice.file_unique_id,
+            msg_type='voice'
+        )
+    elif message.content_type is ContentType.DOCUMENT:
+        await state.update_data(
+            text=message.caption,
+            file_id=message.document.file_id,
+            file_unique_id=message.document.file_unique_id,
+            msg_type='document'
+        )
+    elif message.content_type is ContentType.AUDIO:
+        await state.update_data(
+            text=message.caption,
+            file_id=message.audio.file_id,
+            file_unique_id=message.audio.file_unique_id,
+            msg_type='audio'
+        )
+    elif message.content_type is ContentType.VIDEO:
+        await state.update_data(
+            text=message.caption,
+            file_id=message.video.file_id,
+            file_unique_id=message.video.file_unique_id,
+            msg_type='video'
+        )
     # Меням состояние на ввод даты
     await state.set_state(FSMReminderCreating.fill_date)
 
@@ -132,6 +181,9 @@ async def process_input_time(message: Message,
             (saved_date > current_date):
         # Получим ранее введенный текст
         saved_text: str = saved_data['text']
+        saved_file_id: str = saved_data['file_id']
+        saved_file_unique_id: str = saved_data['file_unique_id']
+        saved_msg_type: str = saved_data['msg_type']
 
         # Добавим новую заметку в базу данных
         reminder: Record = await add_reminder(
@@ -139,7 +191,10 @@ async def process_input_time(message: Message,
             user_id=message.from_user.id,
             reminder_date=saved_date,
             reminder_time=valid_time.time(),
-            reminder_text=saved_text
+            reminder_text=saved_text,
+            file_id=saved_file_id,
+            file_unique_id=saved_file_unique_id,
+            msg_type=saved_msg_type
         )
         # Если была выбрана сегодняшняя дата
         if saved_date == current_date:

@@ -56,8 +56,28 @@ class TodayRemindersClass:
         self.today_reminders.clear()
 
     async def _send_appropriate_reminder(self, reminder):
+        reminder_type: str = reminder['msg_type']
+        user_id: int = reminder['user_id']
+        file_id: str = reminder['file_id']
+        reminder_text: str = reminder['reminder_text']
+
         # Отправляем сообщение пользователю
-        await self.bot.send_message(reminder['user_id'], reminder['reminder_text'])
+        if reminder_type == 'text':
+            await self.bot.send_message(user_id, reminder_text)
+        elif reminder_type == 'photo':
+            await self.bot.send_photo(user_id,
+                                      photo=file_id, caption=reminder_text)
+        elif reminder_type == 'video':
+            await self.bot.send_video(user_id,
+                                      video=file_id, caption=reminder_text)
+        elif reminder_type == 'document':
+            await self.bot.send_document(user_id,
+                                         document=file_id,
+                                         caption=reminder_text)
+        elif reminder_type == 'voice':
+            await self.bot.send_voice(user_id, voice=file_id)
+        elif reminder_type == 'video_note':
+            await self.bot.send_video_note(user_id, video_note=file_id)
 
         # Удаляем напоминание из бд
         async with self.pool.acquire() as connection:

@@ -28,12 +28,19 @@ router: Router = Router()
                        Text(text=LEXICON_RU['change_text_cb']))
 async def process_edit_reminder_text(callback: CallbackQuery,
                                      state: FSMContext):
-    # Установим состояние ввода нового текста
-    await state.set_state(FSMRemindersEditor.new_text)
-    # Отправим пользователю просьбу ввести новый текст заметки
-    await callback.message.edit_text(text=LEXICON_RU['new_reminder_text'],
-                                     reply_markup=kb_with_cancel_button())
-    await callback.answer()
+    # Проверим тип сообщения
+    saved_info: dict[Any] = await state.get_data()
+    msg_type: str = saved_info['msg_type']
+
+    if msg_type in {'video_note', 'voice'}:
+        await callback.answer(text=LEXICON_RU['can_not_change_text'], show_alert=True)
+    else:
+        # Установим состояние ввода нового текста
+        await state.set_state(FSMRemindersEditor.new_text)
+        # Отправим пользователю просьбу ввести новый текст заметки
+        await callback.message.edit_text(text=LEXICON_RU['new_reminder_text'],
+                                         reply_markup=kb_with_cancel_button())
+        await callback.answer()
 
 
 # Хэндлер, который сохраняет отредактированный текст в заметку
