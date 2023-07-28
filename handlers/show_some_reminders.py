@@ -18,6 +18,7 @@ from database import (DataBaseClass, select_reminders, select_chosen_reminder,
                       show_all_reminders)
 from filters import (InputIsDate, ItIsInlineButtonWithReminder, ItIsPageNumber)
 from utils import assemble_full_reminder_text
+from utils.utils import send_not_text
 
 
 router: Router = Router()
@@ -348,28 +349,13 @@ async def show_chosen_reminder(callback: CallbackQuery,
             reply_markup=build_kb_with_reminder()
         )
     else:
-        bot: Bot = Bot.get_current()
-        caption: str | None = None
-
-        if msg_type == 'voice':
-            await bot.send_voice(user_id, voice=file_id)
-        elif msg_type == 'video_note':
-            await bot.send_video_note(user_id, video_note=file_id)
-        else:
-            caption = reminder_text
-
-            if msg_type == 'video':
-                await bot.send_video(user_id, video=file_id)
-            elif msg_type == 'photo':
-                await bot.send_photo(user_id, photo=file_id)
-            elif msg_type == 'audio':
-                await bot.send_audio(user_id, audio=file_id)
-            elif msg_type == 'document':
-                await bot.send_document(user_id, document=file_id)
+        caption: str | None = await send_not_text(msg_type=msg_type, user_id=user_id,
+                                                  file_id=file_id, reminder_text=reminder_text)
 
         await callback.message.answer(text=assemble_full_reminder_text(reminder_text=caption,
                                                                        reminder_date=reminder_date,
-                                                                       reminder_time=reminder_time))
+                                                                       reminder_time=reminder_time),
+                                      reply_markup=build_kb_with_reminder())
 
     await callback.answer()
 
