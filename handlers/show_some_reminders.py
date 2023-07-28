@@ -333,7 +333,9 @@ async def show_chosen_reminder(callback: CallbackQuery,
                             reminder_text=reminder_text,
                             reminder_date=reminder_date,
                             reminder_time=reminder_time,
-                            msg_type=msg_type)
+                            msg_type=msg_type,
+                            user_id=user_id,
+                            file_id=file_id)
 
     # Изменим состояние на просмотр одной заметки
     await state.set_state(FSMRemindersEditor.show_one_reminder)

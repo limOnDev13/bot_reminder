@@ -16,11 +16,38 @@ from states import FSMRemindersEditor
 from database import (DataBaseClass, update_reminder_text, update_reminder_date,
                       update_reminder_time, TodayRemindersClass,
                       select_chosen_reminder)
-from filters import InputIsDate, InputIsTime
+from filters import InputIsDate, InputIsTime, CorrectDateToModifyReminder
 from utils import assemble_full_reminder_text
+from utils.utils import send_not_text
 
 
 router: Router = Router()
+
+
+async def _send_modified_reminder(message: Message, state: FSMContext):
+    reminder_info: dict[str, Any] = await state.get_data()
+    msg_type: str = reminder_info['msg_type']
+    reminder_text: str = reminder_info['reminder_text']
+    reminder_date: date = reminder_info['reminder_date']
+    reminder_time: time = reminder_info['reminder_time']
+
+    if msg_type == 'text':
+        await message.answer(text=assemble_full_reminder_text(reminder_text,
+                                                              reminder_date,
+                                                              reminder_time) +
+                                  LEXICON_RU['done'] + LEXICON_RU['what_edit'],
+                             reply_markup=build_kb_to_edit_one_reminder())
+    else:
+        user_id: int = reminder_info['user_id']
+        file_id: str = reminder_info['file_id']
+
+        caption: str | None = await send_not_text(msg_type=msg_type, user_id=user_id,
+                                                  file_id=file_id, reminder_text=reminder_text)
+        await message.answer(text=assemble_full_reminder_text(caption,
+                                                              reminder_date,
+                                                              reminder_time) +
+                                  LEXICON_RU['done'] + LEXICON_RU['what_edit'],
+                             reply_markup=build_kb_to_edit_one_reminder())
 
 
 # Хэндлер, реагирующий на нажатие кнопки Текст в режиме редактирования
@@ -69,14 +96,7 @@ async def process_enter_new_text(message: Message,
         today_reminders.push([new_reminder])
 
     # Покажем обновленную заметку и спросим что еще нужно изменить
-    reminder_date = reminder_info['reminder_date']
-    reminder_time = reminder_info['reminder_time']
-
-    await message.answer(text=assemble_full_reminder_text(message.text,
-                                                          reminder_date,
-                                                          reminder_time) +
-                              LEXICON_RU['done'] + LEXICON_RU['what_edit'],
-                         reply_markup=build_kb_to_edit_one_reminder())
+    await _send_modified_reminder(message, state)
 
     # Перейдем обратно в режим редактирования одной заметки
     await state.set_state(FSMRemindersEditor.edit_one_reminder)
@@ -97,7 +117,7 @@ async def process_edit_reminder_date(callback: CallbackQuery,
 
 
 # Обработка ввода даты в правильном формате
-@router.message(StateFilter(FSMRemindersEditor.new_date), InputIsDate())
+@router.message(StateFilter(FSMRemindersEditor.new_date), CorrectDateToModifyReminder())
 async def process_enter_new_date(message: Message,
                                  database: DataBaseClass,
                                  state: FSMContext,
@@ -129,14 +149,7 @@ async def process_enter_new_date(message: Message,
             today_reminders.delete(reminder=new_reminder)
 
         # Отправим пользователю обновленную заметку и спросим, что еще нужно изменить
-        reminder_text = reminder_info['reminder_text']
-        reminder_time = reminder_info['reminder_time']
-
-        await message.answer(text=assemble_full_reminder_text(reminder_text,
-                                                              valid_date.date(),
-                                                              reminder_time) +
-                                  LEXICON_RU['done'] + LEXICON_RU['what_edit'],
-                             reply_markup=build_kb_to_edit_one_reminder())
+        await _send_modified_reminder(message, state)
 
         # Изменим состояние на редактирование одной заметки
         await state.set_state(FSMRemindersEditor.edit_one_reminder)
@@ -198,11 +211,7 @@ async def process_enter_new_date(message: Message,
             today_reminders.push([new_reminder])
 
         # Покажем пользователю обновленную заметку и спросим, что еще нужно изменить
-        await message.answer(text=assemble_full_reminder_text(reminder_text,
-                                                              reminder_date,
-                                                              valid_time.time()) +
-                                  LEXICON_RU['done'] + LEXICON_RU['what_edit'],
-                             reply_markup=build_kb_to_edit_one_reminder())
+        await _send_modified_reminder(message, state)
 
         # Изменим состояние на редактирование одной заметки
         await state.set_state(FSMRemindersEditor.edit_one_reminder)

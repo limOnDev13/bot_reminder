@@ -82,7 +82,7 @@ def build_kb_with_reminders(user_id: int,
 
         if msg_type != 'text':
             button_text += msg_type + ' '
-        if msg_type not in {'voice', 'video_note'}:
+        if (msg_type not in {'voice', 'video_note'}) and (reminders[num]['reminder_text'] is not None):
             button_text += reminders[num]['reminder_text'][:100]
 
         button: InlineKeyboardButton = InlineKeyboardButton(
@@ -162,7 +162,7 @@ def build_kb_to_edit_list_reminders(user_id: int,
 
         if msg_type != 'text':
             button_text += msg_type + ' '
-        if msg_type not in {'voice', 'video_note'}:
+        if (msg_type not in {'voice', 'video_note'}) and (reminders[num]['reminder_text'] is not None):
             button_text += reminders[num]['reminder_text'][:100]
 
         button: InlineKeyboardButton = InlineKeyboardButton(

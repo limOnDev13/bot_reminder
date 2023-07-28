@@ -6,4 +6,4 @@
 from . import is_admin
 from .other_filters import (InputIsDate, InputIsTime,
                             ItIsInlineButtonWithReminder, ItIsPageNumber,
-                            ItIsReminderForDeleting)
+                            ItIsReminderForDeleting, CorrectDateToModifyReminder)

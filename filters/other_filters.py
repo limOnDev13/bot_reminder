@@ -3,9 +3,10 @@
 """
 from aiogram.filters import BaseFilter
 from aiogram.types import Message, CallbackQuery
+from aiogram.fsm.context import FSMContext
 
-from typing import List
-from datetime import date, datetime
+from typing import List, Any
+from datetime import date, datetime, time
 
 
 class InputIsDate(BaseFilter):
@@ -37,6 +38,46 @@ class InputIsDate(BaseFilter):
         try:
             valid_date: datetime = datetime.strptime(entered_date, "%d.%m.%Y")
             if valid_date.date() < date.today():
+                return {'valid_date': False}
+            else:
+                return {'valid_date': valid_date}
+        except ValueError:
+            return False
+
+
+class CorrectDateToModifyReminder(BaseFilter):
+    """
+    Класс для проверки корректности ввода даты.
+    """
+    '''
+    Функция, которая сначала проверяет правильность формата ввода даты,
+    после проверяет, существует ли такая дата, и прошла ли она.
+    '''
+    async def __call__(self, message: Message, state: FSMContext) -> bool | dict[str, bool | datetime]:
+        input_date: str = message.text.lstrip(' \n\t')
+        input_text: List[str] = input_date.split('.')
+
+        for item in input_text:
+            if not item.isdigit():
+                return False
+
+        if len(input_text) == 3:
+            entered_date = input_date
+        elif len(input_text) == 2:
+            entered_date = input_date + f'.{date.today().year}'
+        elif len(input_text) == 1:
+            entered_date = input_date + f'.{date.today().month}' + \
+                           f'.{date.today().year}'
+        else:
+            return False
+
+        try:
+            reminder_info: dict[str, Any] = await state.get_data()
+            reminder_time: time = reminder_info['reminder_time']
+
+            valid_date: datetime = datetime.strptime(entered_date, "%d.%m.%Y")
+            if (valid_date.date() < date.today()) or \
+                    ((valid_date.date() == date.today()) and (reminder_time < datetime.now().time())):
                 return {'valid_date': False}
             else:
                 return {'valid_date': valid_date}

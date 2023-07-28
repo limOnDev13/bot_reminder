@@ -10,6 +10,7 @@ from lexicon import LEXICON_RU
 from states import FSMRemindersEditor
 from database import (DataBaseClass, delete_reminder, TodayRemindersClass)
 from utils import assemble_full_reminder_text
+from utils.utils import send_not_text
 
 
 router: Router = Router()
@@ -55,13 +56,24 @@ async def process_edit_one_reminder(callback: CallbackQuery,
     reminder_text: str = reminder_info['reminder_text']
     reminder_date: date = reminder_info['reminder_date']
     reminder_time: time = reminder_info['reminder_time']
+    msg_type: str = reminder_info['msg_type']
+    user_id: int = reminder_info['user_id']
+    file_id: str = reminder_info['file_id']
 
     # Показываем напоминание пользователю и просим выбрать, что он хочет изменить
-    await callback.message.edit_text(
-        text=assemble_full_reminder_text(reminder_text,
-                                         reminder_date,
-                                         reminder_time) + LEXICON_RU['what_edit'],
-        reply_markup=build_kb_to_edit_one_reminder())
+    if msg_type == 'text':
+        await callback.message.edit_text(
+            text=assemble_full_reminder_text(reminder_text,
+                                             reminder_date,
+                                             reminder_time) + LEXICON_RU['what_edit'],
+            reply_markup=build_kb_to_edit_one_reminder())
+    else:
+        caption: str | None = await send_not_text(msg_type, user_id, file_id, reminder_text)
+        await callback.message.answer(
+            text=assemble_full_reminder_text(caption,
+                                             reminder_date,
+                                             reminder_time) + LEXICON_RU['what_edit'],
+            reply_markup=build_kb_to_edit_one_reminder())
     await callback.answer()
 
     # Изменяем состояние на редактирование одной заметки
