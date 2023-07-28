@@ -70,6 +70,9 @@ class TodayRemindersClass:
         elif reminder_type == 'video':
             await self.bot.send_video(user_id,
                                       video=file_id, caption=reminder_text)
+        elif reminder_type == 'audio':
+            await self.bot.send_audio(user_id,
+                                      audio=file_id, caption=reminder_text)
         elif reminder_type == 'document':
             await self.bot.send_document(user_id,
                                          document=file_id,

@@ -47,7 +47,7 @@ async def start_saving_process(message: Message, state: FSMContext):
         await state.update_data(text=message.text,
                                 file_id=None,
                                 file_unique_id=None,
-                                msg_text='text')
+                                msg_type='text')
     # Если пользователь прислал любой другой тип
     elif message.content_type is ContentType.PHOTO:
         await state.update_data(
