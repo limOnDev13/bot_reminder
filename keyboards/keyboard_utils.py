@@ -78,7 +78,12 @@ def build_kb_with_reminders(user_id: int,
             reminder_time: time = reminders[num]['reminder_time']
             button_text += reminder_time.strftime("%H:%M") + ' '
 
-        button_text += reminders[num]['reminder_text'][:100]
+        msg_type: str = reminders[num]['msg_type']
+
+        if msg_type != 'text':
+            button_text += msg_type + ' '
+        if msg_type not in {'voice', 'video_note'}:
+            button_text += reminders[num]['reminder_text'][:100]
 
         button: InlineKeyboardButton = InlineKeyboardButton(
             text=button_text,
@@ -153,7 +158,12 @@ def build_kb_to_edit_list_reminders(user_id: int,
             reminder_time: time = reminders[num]['reminder_time']
             button_text += reminder_time.strftime("%H:%M") + ' '
 
-        button_text += reminders[num]['reminder_text'][:100]
+        msg_type: str = reminders[num]['msg_type']
+
+        if msg_type != 'text':
+            button_text += msg_type + ' '
+        if msg_type not in {'voice', 'video_note'}:
+            button_text += reminders[num]['reminder_text'][:100]
 
         button: InlineKeyboardButton = InlineKeyboardButton(
             text=button_text,

@@ -67,14 +67,14 @@ async def add_reminder(connector: DataBaseClass,
 # Выберем в таблице Reminders заметки на выбранную дату или все заметки
 async def select_reminders(connector: DataBaseClass,
                            user_id: int, reminder_date: date | None,
-                           show_all_reminders: bool = False) -> List[Record]:
+                           all_reminders: bool = False) -> List[Record]:
     command: str
     args: List[int | date]
 
-    if show_all_reminders:
+    if all_reminders:
         command = \
             """
-            SELECT reminder_id, reminder_date, reminder_time, reminder_text
+            SELECT *
             FROM "Reminders"
             WHERE user_id = $1
             ORDER BY reminder_date, reminder_time;
@@ -83,7 +83,7 @@ async def select_reminders(connector: DataBaseClass,
     else:
         command = \
             """
-            SELECT reminder_id, reminder_date, reminder_time, reminder_text
+            SELECT *
             FROM "Reminders"
             WHERE user_id = $1 AND reminder_date = $2
             ORDER BY reminder_date, reminder_time;
