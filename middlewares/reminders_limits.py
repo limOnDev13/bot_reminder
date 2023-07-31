@@ -13,7 +13,7 @@ from database.methods import check_premium, get_num_reminders
 from lexicon import LEXICON_RU
 
 
-MAX_NUM_REMINDERS_FOR_NOT_PREMIUM: int = 3
+MAX_NUM_REMINDERS_FOR_NOT_PREMIUM: int = 50
 
 
 class RemindersLimits(BaseMiddleware):

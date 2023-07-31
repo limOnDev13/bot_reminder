@@ -1,7 +1,7 @@
 """
 Модуль с хэндлерами для просмотра и редактирования сохраненных заметок.
 """
-from aiogram import Router, Bot
+from aiogram import Router
 from aiogram.filters import Command, Text, StateFilter, or_f
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
@@ -68,10 +68,12 @@ async def process_cancel_view_reminders(callback: CallbackQuery,
 
 
 # Обработка нажатия на клавишу Сегодня или Завтра в состоянии ввода даты для
-# просмотра напоминаний
+# просмотра напоминаний, или команды /today и /tomorrow в дефолтном состоянии
 @router.message(StateFilter(FSMRemindersEditor.fill_date_to_show_reminders),
                 Text(text=[LEXICON_RU['today_bt_text'],
                            LEXICON_RU['tomorrow_bt_text']]))
+@router.message(StateFilter(default_state),
+                Command(commands=['today', 'tomorrow']))
 async def show_today_or_tomorrow_reminders(message: Message,
                                            database: DataBaseClass,
                                            state: FSMContext):
@@ -85,7 +87,8 @@ async def show_today_or_tomorrow_reminders(message: Message,
     selected_date: date
 
     # Если выбран сегодняшний день
-    if message.text == LEXICON_RU['today_bt_text']:
+    if (message.text == LEXICON_RU['today_bt_text']) or\
+            (message.text == '/today'):
         # Укажем сегодняшний день и соответсвующее сообщение пользователю
         selected_date = date.today()
         msg_text = LEXICON_RU['today_msg']
