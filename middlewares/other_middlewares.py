@@ -1,7 +1,9 @@
 """
 Модуль, отвечающий за различные миддлвари, которые не попали в другие файлы
 """
-from typing import Callable, Dict, Any, Awaitable
+
+from typing import Any, Awaitable, Callable, Dict
+
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 
@@ -14,12 +16,12 @@ class TodayRemindersMiddleware(BaseMiddleware):
         self.today_reminders = today_reminders
 
     async def __call__(
-            self,
-            handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
-            event: TelegramObject,
-            data: Dict[str, Any]
+        self,
+        handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+        event: TelegramObject,
+        data: Dict[str, Any],
     ) -> Any:
-        data['today_reminders'] = self.today_reminders
+        data["today_reminders"] = self.today_reminders
         return await handler(event, data)
 
 
@@ -29,10 +31,10 @@ class ProviderTokenMiddleware(BaseMiddleware):
         self.provider_token = provider_token
 
     async def __call__(
-            self,
-            handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
-            event: TelegramObject,
-            data: Dict[str, Any]
+        self,
+        handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+        event: TelegramObject,
+        data: Dict[str, Any],
     ) -> Any:
-        data['provider_token'] = self.provider_token
+        data["provider_token"] = self.provider_token
         return await handler(event, data)
