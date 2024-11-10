@@ -24,3 +24,4 @@ middlewares/__pycache__/reminders_limits.cpython-310.pyc
 /.venv/
 /pgdata/
 /.venv_dev/
+/.idea/dbnavigator.xml
