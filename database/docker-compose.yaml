@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:13.3
+    environment:
+      # DEBUG
+      - POSTGRES_USER=${USER}
+      - POSTGRES_PASSWORD=${PASSWORD}
+      - POSTGRES_HOST=${HOST}
+      - POSTGRES_PORT=${PORT}
+      - POSTGRES_DB=${DATABASE}
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db/:/var/lib/postgresql/data
