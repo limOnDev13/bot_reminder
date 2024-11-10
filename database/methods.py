@@ -1,19 +1,20 @@
 """
 Модуль с методами для взаимодействия с базами данных
 """
-from . connection_pool import DataBaseClass
-from datetime import date, time, datetime
-from typing import List, Tuple
+
+from datetime import date, datetime, time
+from typing import List, Tuple, Optional
+
 from asyncpg import Record
+
+from .connection_pool import DataBaseClass
 
 
 # Добавим в таблицу Users нового пользователя
-async def add_new_user(connector: DataBaseClass,
-                       user_id: int):
-    command = \
-        """
+async def add_new_user(connector: DataBaseClass, user_id: int):
+    command = """
         INSERT INTO "Users"
-        VALUES($1, DEFAULT, DEFAULT)
+        VALUES($1, false, 0)
         ON CONFLICT (user_id) DO UPDATE
             SET premium = excluded.premium,
                 num_reminders = excluded.num_reminders;
@@ -22,17 +23,18 @@ async def add_new_user(connector: DataBaseClass,
 
 
 # Добавим в таблицу Reminders новую заметку
-async def add_reminder(connector: DataBaseClass,
-                       user_id: int,
-                       reminder_date: date,
-                       reminder_time: time,
-                       reminder_text: str,
-                       file_id: str = None,
-                       file_unique_id: str = None,
-                       msg_type: str = 'text') -> Record:
+async def add_reminder(
+    connector: DataBaseClass,
+    user_id: int,
+    reminder_date: date,
+    reminder_time: time,
+    reminder_text: str,
+    file_id: Optional[str] = None,
+    file_unique_id: Optional[str] = None,
+    msg_type: str = "text",
+) -> Record:
     # Добавим заметку в базу данных
-    command1 = \
-        """
+    command1 = """
         INSERT INTO "Reminders"
         VALUES(DEFAULT, $1, $2, $3, $4, $5, $6, $7, $8)
         ON CONFLICT (reminder_id) DO UPDATE
@@ -40,21 +42,28 @@ async def add_reminder(connector: DataBaseClass,
                 reminder_time = excluded.reminder_time,
                 reminder_text = excluded.reminder_text;
         """
-    await connector.execute(command1, *[user_id, reminder_date,
-                                        reminder_time, reminder_text,
-                                        True, file_id, file_unique_id,
-                                        msg_type],
-                            execute=True)
+    await connector.execute(
+        command1,
+        *[
+            user_id,
+            reminder_date,
+            reminder_time,
+            reminder_text,
+            True,
+            file_id,
+            file_unique_id,
+            msg_type,
+        ],
+        execute=True
+    )
     # Получим последнюю заметку
-    command2 = \
-        """
+    command2 = """
         SELECT * FROM "Reminders"
         WHERE last_reminder = True
         """
     result_reminder = await connector.execute(command2, fetchrow=True)
     # Изменим у последней заметки параметр last_reminder на False
-    command3 = \
-        """
+    command3 = """
         UPDATE "Reminders"
         SET last_reminder = False
         WHERE last_reminder = True;
@@ -65,15 +74,17 @@ async def add_reminder(connector: DataBaseClass,
 
 
 # Выберем в таблице Reminders заметки на выбранную дату или все заметки
-async def select_reminders(connector: DataBaseClass,
-                           user_id: int, reminder_date: date | None,
-                           all_reminders: bool = False) -> List[Record]:
+async def select_reminders(
+    connector: DataBaseClass,
+    user_id: int,
+    reminder_date: date | None,
+    all_reminders: bool = False,
+) -> List[Record]:
     command: str
     args: List[int | date]
 
     if all_reminders:
-        command = \
-            """
+        command = """
             SELECT *
             FROM "Reminders"
             WHERE user_id = $1
@@ -81,8 +92,7 @@ async def select_reminders(connector: DataBaseClass,
             """
         args = [user_id]
     else:
-        command = \
-            """
+        command = """
             SELECT *
             FROM "Reminders"
             WHERE user_id = $1 AND reminder_date = $2
@@ -96,8 +106,7 @@ async def select_reminders(connector: DataBaseClass,
 
 # Выберем в таблице Reminders определенную заметку
 async def select_chosen_reminder(connector: DataBaseClass, reminder_id: int) -> Record:
-    command: str = \
-        """
+    command: str = """
         SELECT *
         FROM "Reminders"
         WHERE reminder_id = $1
@@ -107,8 +116,7 @@ async def select_chosen_reminder(connector: DataBaseClass, reminder_id: int) -> 
 
 # Удалим в таблице Reminders определенную заметку
 async def delete_reminder(connector: DataBaseClass, reminder_id: int) -> None:
-    command = \
-        """
+    command = """
         DELETE FROM "Reminders"
         WHERE reminder_id = $1;
         """
@@ -116,52 +124,44 @@ async def delete_reminder(connector: DataBaseClass, reminder_id: int) -> None:
 
 
 # Обновим в таблице Reminders в определенной заметке текст
-async def update_reminder_text(connector: DataBaseClass,
-                               reminder_id: int,
-                               new_reminder_text: str) -> None:
-    command = \
-        """
+async def update_reminder_text(
+    connector: DataBaseClass, reminder_id: int, new_reminder_text: str
+) -> None:
+    command = """
         UPDATE "Reminders"
         SET reminder_text = $1
         WHERE reminder_id = $2;
         """
-    await connector.execute(command, *[new_reminder_text, reminder_id],
-                            execute=True)
+    await connector.execute(command, *[new_reminder_text, reminder_id], execute=True)
 
 
 # Обновим в таблице Reminders в определенной заметке дату
-async def update_reminder_date(connector: DataBaseClass,
-                               reminder_id: int,
-                               new_reminder_date: date) -> None:
-    command = \
-        """
+async def update_reminder_date(
+    connector: DataBaseClass, reminder_id: int, new_reminder_date: date
+) -> None:
+    command = """
         UPDATE "Reminders"
         SET reminder_date = $1
         WHERE reminder_id = $2;
         """
-    await connector.execute(command, *[new_reminder_date, reminder_id],
-                            execute=True)
+    await connector.execute(command, *[new_reminder_date, reminder_id], execute=True)
 
 
 # Обновим в таблице Reminders в определенной заметке время
-async def update_reminder_time(connector: DataBaseClass,
-                               reminder_id: int,
-                               new_reminder_time: time):
-    command = \
-        """
+async def update_reminder_time(
+    connector: DataBaseClass, reminder_id: int, new_reminder_time: time
+):
+    command = """
         UPDATE "Reminders"
         SET reminder_time = $1
         WHERE reminder_id = $2
         """
-    await connector.execute(command, *[new_reminder_time, reminder_id],
-                            execute=True)
+    await connector.execute(command, *[new_reminder_time, reminder_id], execute=True)
 
 
 # Выберем в таблице Reminders все (полные) заметки определенного пользователя
-async def show_all_reminders(connector: DataBaseClass,
-                             user_id: int) -> List[Record]:
-    command = \
-        """
+async def show_all_reminders(connector: DataBaseClass, user_id: int) -> List[Record]:
+    command = """
         SELECT * FROM "Reminders"
         WHERE user_id = $1
         ORDER BY reminder_date, reminder_time
@@ -171,8 +171,7 @@ async def show_all_reminders(connector: DataBaseClass,
 
 # Выберем в таблице Reminders заметки всех пользователей на сегодняшний день
 async def get_today_reminders(connector: DataBaseClass) -> List[Record]:
-    command = \
-        """
+    command = """
         SELECT * FROM "Reminders"
         WHERE reminder_date = $1
         ORDER BY reminder_time
@@ -181,10 +180,10 @@ async def get_today_reminders(connector: DataBaseClass) -> List[Record]:
 
 
 # Удалим из таблицы Reminders несколько заметок
-async def delete_some_reminders(connector: DataBaseClass,
-                               input_data: List[Tuple[int]]) -> None:
-    command = \
-        """
+async def delete_some_reminders(
+    connector: DataBaseClass, input_data: List[Tuple[int]]
+) -> None:
+    command = """
         DELETE FROM "Reminders"
         WHERE reminder_id = $1;
         """
@@ -193,20 +192,19 @@ async def delete_some_reminders(connector: DataBaseClass,
 
 # Удалим неактуальные заметки
 async def delete_irrelevant_reminders(connector: DataBaseClass):
-    command = \
-        """
+    command = """
         DELETE FROM "Reminders"
-        WHERE (reminder_time < $1 AND reminder_date = $2) 
+        WHERE (reminder_time < $1 AND reminder_date = $2)
         OR (reminder_date < $2);
         """
-    await connector.execute(command, *[datetime.now().time(), date.today()],
-                            execute=True)
+    await connector.execute(
+        command, *[datetime.now().time(), date.today()], execute=True
+    )
 
 
 # Изменим премиум-статус пользователя
 async def set_premium(connector: DataBaseClass, user_id: int):
-    command = \
-        """
+    command = """
         Update "Users"
         SET premium = True
         WHERE user_id = $1
@@ -216,8 +214,7 @@ async def set_premium(connector: DataBaseClass, user_id: int):
 
 # Проверим премиум-статус пользователя
 async def check_premium(connector: DataBaseClass, user_id: int) -> Record:
-    command = \
-        """
+    command = """
         SELECT premium FROM "Users"
         WHERE user_id = $1
         """
@@ -227,18 +224,15 @@ async def check_premium(connector: DataBaseClass, user_id: int) -> Record:
 # Получаем количество заметок
 async def get_num_reminders(connector: DataBaseClass, user_id: int) -> Record:
     # Сначала обновим информацию о количестве, а после уже получим значение
-    command = \
-        """
+    command = """
         UPDATE "Users"
         SET num_reminders = (SELECT COUNT(*) FROM "Reminders" WHERE user_id = $1)
         WHERE user_id = $1;
         """
     await connector.execute(command, user_id, execute=True)
 
-    command = \
-        """
+    command = """
         SELECT num_reminders FROM "Users"
         WHERE user_id = $1;
         """
     return await connector.execute(command, user_id, fetchrow=True)
-
