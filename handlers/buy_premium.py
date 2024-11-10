@@ -1,28 +1,26 @@
 from aiogram import Bot
 from aiogram.types import LabeledPrice, Message, PreCheckoutQuery
-from lexicon import LEXICON_RU
-from database.methods import set_premium
-from database.connection_pool import DataBaseClass
 
+from database.connection_pool import DataBaseClass
+from database.methods import set_premium
+from lexicon import LEXICON_RU
 
 price_premium: LabeledPrice = LabeledPrice(
-    label=LEXICON_RU['label_premium'],
-    amount=99999  # Указано в копейках
+    label=LEXICON_RU["label_premium"], amount=99999  # Указано в копейках
 )
 discount_amount: LabeledPrice = LabeledPrice(
-    label=LEXICON_RU['label_discount'],
-    amount=-99
+    label=LEXICON_RU["label_discount"], amount=-99
 )
 
 
 async def order(message: Message, bot: Bot, provider_token: str):
     await bot.send_invoice(
         chat_id=message.chat.id,
-        title=LEXICON_RU['payment_title'],
-        description=LEXICON_RU['payment_description'],
-        payload=LEXICON_RU['payment_payload'],
+        title=LEXICON_RU["payment_title"],
+        description=LEXICON_RU["payment_description"],
+        payload=LEXICON_RU["payment_payload"],
         provider_token=provider_token,
-        currency='rub',
+        currency="rub",
         prices=[price_premium, discount_amount],
         max_tip_amount=5000,  # Максимальный размер чаевых
         # Предлагаемые чаевые (максимум только 4)
@@ -30,11 +28,13 @@ async def order(message: Message, bot: Bot, provider_token: str):
         # если стартовый параметр пустой, то при пересылке счета оплатить может
         # кто угодно, если не пустой - при пересылке счета будет присылаться ссылка
         # на бота
-        start_parameter='limon_fresh',
+        start_parameter="limon_fresh",
         # Необходимая инфа для провайдера
         provider_data=None,
         # Ссылка на фото, которое отобразиться в счете
-        photo_url='https://storage.easyx.ru/images/easydonate/products/HzllzSdR23OHvPXxF3YCrkGwdR4IgQ29.jpg',
+        photo_url="https://storage.easyx.ru/"
+        "images/easydonate/products/"
+        "HzllzSdR23OHvPXxF3YCrkGwdR4IgQ29.jpg",
         # Размер фото
         photo_size=100,
         photo_width=450,
@@ -62,7 +62,7 @@ async def order(message: Message, bot: Bot, provider_token: str):
         # не найдено
         allow_sending_without_reply=True,
         reply_markup=None,
-        request_timeout=15
+        request_timeout=15,
     )
 
 
@@ -72,8 +72,10 @@ async def send_pre_checkout_query(pre_checkout_query: PreCheckoutQuery, bot: Bot
 
 
 async def successful_payment(message: Message, database: DataBaseClass):
-    msg: str = LEXICON_RU['successful_payment_msg'] + \
-               f'{message.successful_payment.total_amount // 100} ' \
-               f'{message.successful_payment.currency}.'
+    msg: str = (
+        LEXICON_RU["successful_payment_msg"]
+        + f"{message.successful_payment.total_amount // 100} "
+        f"{message.successful_payment.currency}."
+    )
     await message.answer(msg)
     await set_premium(connector=database, user_id=message.from_user.id)
